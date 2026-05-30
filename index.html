@@ -135,7 +135,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .tag-hike{background:#E8F5E0;color:#2D6B1A;border-color:transparent}
 .tag-history{background:#EDE8FC;color:#4A35A0;border-color:transparent}
 .tag-free{background:var(--sand2);color:var(--ink2);border-color:transparent}
-.tag-travel{background:var(--coral-lt);color:var(--coral);border-color:transparent}
+.tag-travel{background:var(--coral-lt);color:var(--coral);border-color:transparent} .tag-general{background:var(--sand2);color:var(--ink);border-color:transparent} .tag-explore{background:var(--sea-lt);color:var(--sea2);border-color:transparent}color:var(--coral);border-color:transparent}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:.9rem;padding:0 2px;line-height:1;opacity:.4;transition:opacity .15s;flex-shrink:0}
 .del-btn:hover{opacity:1;color:var(--coral)}
 .add-event-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
@@ -1724,7 +1724,7 @@ function renderItinerary(){
         <input class="event-text-input" value="${esc(ev.text)}" placeholder="Event description"
           onchange="appState.days[${di}].events[${ei}].text=this.value;scheduleSave()">
         <select class="tag-select ${tagClass}" onchange="appState.days[${di}].events[${ei}].tag=this.value;this.className='tag-select tag-'+this.value;scheduleSave()">
-          ${['dive','sail','kite','hike','history','free','travel'].map(t=>`<option value="${t}"${ev.tag===t?' selected':''}>${t}</option>`).join('')}
+          ${['dive','sail','kite','hike','history','free','travel','general','explore'].map(t=>`<option value="${t}"${ev.tag===t?' selected':''}>${t}</option>`).join('')}
         </select>
         <button class="del-btn" onclick="removeEvent(${di},${ei})" aria-label="remove">✕</button>`;
       evList.appendChild(row);
@@ -2073,7 +2073,7 @@ const TRIP_YEAR = 2026;
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 // tag → chip class
-const CHIP_CLASS = {dive:'chip-dive',sail:'chip-sail',kite:'chip-kite',hike:'chip-hike',history:'chip-history',free:'chip-free',travel:'chip-travel'};
+const CHIP_CLASS = {dive:'chip-dive',sail:'chip-sail',kite:'chip-kite',hike:'chip-hike',history:'chip-history',free:'chip-free',travel:'chip-travel',general:'chip-free',explore:'chip-sail'};
 const TAG_COLORS = {dive:['#D4F0E8','#1A7A6A'],sail:['#D6ECF5','#1B5E7B'],kite:['#FAECD6','#C4762A'],hike:['#E8F5E0','#2D6B1A'],history:['#EDE8FC','#4A35A0'],free:['#EDE4CC','#4A4540'],travel:['#FAE0E0','#B84040']};
 
 let calYear = TRIP_YEAR;
