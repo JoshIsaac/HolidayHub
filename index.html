@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corfu 2026 — Holiday Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sand:#F5EFE0;--sand2:#EDE4CC;--ink:#1A1A1A;--ink2:#4A4540;--ink3:#8A8178;
+  --sea:#1B5E7B;--sea2:#267DA8;--sea-lt:#D6ECF5;
+  --teal:#1A7A6A;--teal-lt:#D4F0E8;
+  --amber:#C4762A;--amber-lt:#FAECD6;
+  --coral:#B84040;--coral-lt:#FAE0E0;
+  --white:#FFFFFF;--border:rgba(26,26,26,0.12);
+  --radius:10px;--radius-lg:16px;
+}
+html{font-size:15px}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;line-height:1.6}
+.site-header{background:var(--ink);color:var(--white);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.site-header h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:500;letter-spacing:.02em}
+.site-header h1 span{color:var(--sea2)}
+.header-meta{font-size:.8rem;color:rgba(255,255,255,.5)}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 56px)}
+.sidebar{background:var(--ink);padding:1.5rem 0;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 1.5rem;color:rgba(255,255,255,.5);cursor:pointer;font-size:.875rem;border-left:2px solid transparent;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.05)}
+.nav-item.active{color:var(--white);border-left-color:var(--sea2);background:rgba(255,255,255,.07);font-weight:500}
+.nav-icon{font-size:1rem;width:20px;text-align:center}
+.nav-section{font-size:.7rem;color:rgba(255,255,255,.3);padding:1rem 1.5rem .25rem;letter-spacing:.08em;text-transform:uppercase}
+.user-toggle{margin-top:auto;padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.user-toggle p{font-size:.7rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.user-btns{display:flex;gap:6px}
+.user-btn{flex:1;padding:6px 4px;font-size:.8rem;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.user-btn.active{background:var(--sea2);border-color:var(--sea2);color:var(--white);font-weight:500}
+.main{padding:2rem;overflow-y:auto}
+.panel{display:none}
+.panel.active{display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:500;margin-bottom:.25rem}
+.page-subtitle{font-size:.85rem;color:var(--ink3);margin-bottom:1.5rem}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.card-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:.75rem}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem}
+.stat-label{font-size:.75rem;color:var(--ink3);margin-bottom:4px}
+.stat-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--ink)}
+.day-row{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.day-header{display:flex;align-items:center;justify-content:space-between;padding:12px 1rem;cursor:pointer;transition:background .12s}
+.day-header:hover{background:var(--sand)}
+.day-header-left{display:flex;align-items:center;gap:12px}
+.day-num{width:32px;height:32px;border-radius:8px;background:var(--sea);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:500;flex-shrink:0}
+.day-name{font-weight:500;font-size:.9rem}
+.day-theme{font-size:.8rem;color:var(--ink3)}
+.day-chevron{font-size:.8rem;color:var(--ink3);transition:transform .2s}
+.day-chevron.open{transform:rotate(180deg)}
+.day-body{padding:0 1rem 12px;border-top:1px solid var(--border);display:none}
+.event-list{margin-top:10px}
+.event-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.event-item:last-of-type{border-bottom:none}
+.event-time{font-size:.75rem;color:var(--ink3);width:38px;flex-shrink:0}
+.event-text{flex:1;font-size:.875rem}
+.tag{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
+.tag-dive{background:var(--teal-lt);color:var(--teal)}
+.tag-sail{background:var(--sea-lt);color:var(--sea)}
+.tag-kite{background:var(--amber-lt);color:var(--amber)}
+.tag-hike{background:#E8F5E0;color:#2D6B1A}
+.tag-history{background:#EDE8FC;color:#4A35A0}
+.tag-free{background:var(--sand2);color:var(--ink2)}
+.tag-travel{background:var(--coral-lt);color:var(--coral)}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:1rem;padding:0 2px;line-height:1;opacity:.5;transition:opacity .15s}
+.del-btn:hover{opacity:1;color:var(--coral)}
+.add-event-form{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.add-event-form input,.add-event-form select{font-family:'DM Sans',sans-serif;font-size:.8rem;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--sand);color:var(--ink);outline:none}
+.add-event-form input:focus,.add-event-form select:focus{border-color:var(--sea2)}
+.add-event-form input[type="text"]{flex:1;min-width:120px}
+.add-event-form input[name="time"]{width:60px}
+.add-event-form select{width:96px}
+.btn{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--sand);border-color:var(--ink3)}
+.btn-primary{background:var(--sea);color:var(--white);border-color:var(--sea)}
+.btn-primary:hover{background:var(--sea2);border-color:var(--sea2)}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.wish-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.wish-item:last-of-type{border-bottom:none}
+.wish-name{flex:1;font-size:.875rem}
+.wish-votes{display:flex;align-items:center;gap:6px}
+.vote-btn{font-family:'DM Sans',sans-serif;font-size:.75rem;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--ink3);cursor:pointer;transition:all .12s}
+.vote-btn.voted{background:var(--sea);border-color:var(--sea);color:var(--white);font-weight:500}
+.vote-tally{font-size:.75rem;font-weight:500;color:var(--ink3);min-width:28px;text-align:center}
+.vote-tally.full{color:var(--teal)}
+.wish-badge{font-size:.7rem;padding:2px 8px;border-radius:20px;background:var(--teal-lt);color:var(--teal);font-weight:500}
+.budget-bar-wrap{height:8px;background:var(--sand2);border-radius:4px;margin:8px 0 1.25rem;overflow:hidden}
+.budget-bar-fill{height:8px;border-radius:4px;background:var(--sea);transition:width .4s}
+.budget-bar-fill.over{background:var(--coral)}
+.expense-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.expense-item:last-of-type{border-bottom:none}
+.who-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:500;flex-shrink:0}
+.who-p1{background:var(--sea-lt);color:var(--sea)}
+.who-p2{background:var(--teal-lt);color:var(--teal)}
+.who-both{background:var(--amber-lt);color:var(--amber)}
+.exp-info{flex:1}
+.exp-name{font-size:.875rem}
+.exp-cat{font-size:.75rem;color:var(--ink3)}
+.exp-amt{font-size:.9rem;font-weight:500}
+.budget-input-row{display:flex;gap:8px;align-items:center;margin-bottom:.75rem}
+.budget-input-row label{font-size:.875rem;color:var(--ink2)}
+.budget-input-row input{font-family:'DM Sans',sans-serif;font-size:.9rem;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);width:130px;outline:none}
+.budget-input-row input:focus{border-color:var(--sea2)}
+.split-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.75rem}
+.split-card{background:var(--sand);border-radius:var(--radius);padding:10px 12px}
+.split-card .sc-label{font-size:.75rem;color:var(--ink3);margin-bottom:3px}
+.split-card .sc-value{font-size:1.1rem;font-weight:500}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.progress-bar-wrap{flex:1;height:6px;background:var(--sand2);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:6px;border-radius:3px;background:var(--teal);transition:width .3s}
+.progress-label{font-size:.8rem;color:var(--ink3);min-width:70px;text-align:right}
+.pack-cat-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin:1rem 0 .5rem;display:flex;align-items:center;gap:6px}
+.pack-cat-title:first-child{margin-top:0}
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.pack-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s}
+.pack-item:hover{background:var(--sand);border-color:var(--border)}
+.pack-item.checked{opacity:.45}
+.pack-item.checked .pack-label{text-decoration:line-through}
+.pack-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--ink3);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.pack-item.checked .pack-check{background:var(--teal);border-color:var(--teal)}
+.pack-checkmark{display:none;color:white;font-size:10px;font-weight:700}
+.pack-item.checked .pack-checkmark{display:block}
+.pack-label{font-size:.85rem}
+.form-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.form-row input,.form-row select{font-family:'DM Sans',sans-serif;font-size:.82rem;padding:7px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none}
+.form-row input:focus,.form-row select:focus{border-color:var(--sea2)}
+.form-row input[type="text"]{flex:1;min-width:100px}
+.form-row input[type="number"]{width:90px}
+.status-bar{position:fixed;bottom:1.25rem;right:1.5rem;background:var(--ink);color:var(--white);padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.status-bar.show{opacity:1}
+.empty{font-size:.875rem;color:var(--ink3);padding:1rem 0;text-align:center}
+.conn-badge{font-size:.72rem;padding:2px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.conn-dot{width:6px;height:6px;border-radius:50%}
+.conn-ok{background:rgba(26,122,106,.2);color:#1A7A6A}
+.conn-ok .conn-dot{background:#1A7A6A}
+.conn-err{background:rgba(184,64,64,.2);color:var(--coral)}
+.conn-err .conn-dot{background:var(--coral)}
+.conn-wait{background:rgba(196,118,42,.2);color:var(--amber)}
+.conn-wait .conn-dot{background:var(--amber)}
+.setup-banner{background:var(--amber-lt);border:1px solid var(--amber);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.setup-banner h3{font-size:.9rem;font-weight:500;color:var(--amber);margin-bottom:4px}
+.setup-banner p{font-size:.82rem;color:var(--ink2);line-height:1.55}
+.setup-banner code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:4px;font-size:.8rem;font-family:monospace}
+@media(max-width:680px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{flex-direction:row;flex-wrap:wrap;padding:.5rem;overflow-x:auto}
+  .nav-section{display:none}
+  .nav-item{padding:8px 10px;border-left:none;border-bottom:2px solid transparent;font-size:.8rem}
+  .nav-item.active{border-left:none;border-bottom-color:var(--sea2)}
+  .user-toggle{display:none}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .main{padding:1rem}
+  .pack-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <h1>Corfu <span>2026</span> — Holiday Planner</h1>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div id="conn-badge" class="conn-badge conn-wait"><div class="conn-dot"></div><span>Connecting…</span></div>
+    <span class="header-meta">7 – 18 August</span>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-section">Plan</div>
+    <a class="nav-item active" onclick="showPanel('itinerary',this)"><span class="nav-icon">📅</span> Itinerary</a>
+    <a class="nav-item" onclick="showPanel('wishlist',this)"><span class="nav-icon">⭐</span> Wishlist</a>
+    <div class="nav-section">Finance</div>
+    <a class="nav-item" onclick="showPanel('budget',this)"><span class="nav-icon">💷</span> Budget</a>
+    <div class="nav-section">Prep</div>
+    <a class="nav-item" onclick="showPanel('packing',this)"><span class="nav-icon">🎒</span> Packing</a>
+    <div class="user-toggle">
+      <p>Viewing as</p>
+      <div class="user-btns">
+        <button class="user-btn active" onclick="setUser('p1',this)">You</button>
+        <button class="user-btn" onclick="setUser('p2',this)">Partner</button>
+      </div>
+    </div>
+  </nav>
+  <main class="main">
+    <div id="setup-banner" class="setup-banner" style="display:none">
+      <h3>⚠ Supabase not configured yet</h3>
+      <p>Open <code>index.html</code> and replace <code>YOUR_SUPABASE_URL</code> and <code>YOUR_SUPABASE_ANON_KEY</code> near the bottom of the file with your project credentials from supabase.com. See <code>README.md</code> for the full setup guide.</p>
+    </div>
+    <div id="panel-itinerary" class="panel active">
+      <div class="page-title">Itinerary</div>
+      <p class="page-subtitle">7 – 18 August · 11 nights in Corfu</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Dive days</div><div class="stat-value">3</div></div>
+        <div class="stat-card"><div class="stat-label">Sail days</div><div class="stat-value">2</div></div>
+        <div class="stat-card"><div class="stat-label">Hike days</div><div class="stat-value">3</div></div>
+        <div class="stat-card"><div class="stat-label">History days</div><div class="stat-value">3</div></div>
+      </div>
+      <div id="days-container"></div>
+    </div>
+    <div id="panel-wishlist" class="panel">
+      <div class="page-title">Wishlist</div>
+      <p class="page-subtitle">Vote on activities — both of you must vote to confirm</p>
+      <div class="card">
+        <div id="wish-list"></div>
+        <div class="form-row">
+          <input type="text" id="wish-input" placeholder="Add an activity…">
+          <button class="btn btn-primary btn-sm" onclick="addWish()">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div id="panel-budget" class="panel">
+      <div class="page-title">Budget</div>
+      <p class="page-subtitle">Track shared and individual expenses</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total budget</div><div class="stat-value" id="b-total">£–</div></div>
+        <div class="stat-card"><div class="stat-label">Spent</div><div class="stat-value" id="b-spent">£0</div></div>
+        <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value" id="b-remain">£–</div></div>
+        <div class="stat-card"><div class="stat-label">% used</div><div class="stat-value" id="b-pct">0%</div></div>
+      </div>
+      <div class="budget-bar-wrap"><div class="budget-bar-fill" id="b-bar" style="width:0%"></div></div>
+      <div class="card">
+        <div class="card-title">Set budget</div>
+        <div class="budget-input-row">
+          <label>Total (£)</label>
+          <input type="number" id="budget-amt" placeholder="e.g. 3000" oninput="saveBudget()">
+          <span style="font-size:.8rem;color:var(--ink3)">combined or per person</span>
+        </div>
+        <div class="split-summary">
+          <div class="split-card"><div class="sc-label">You spent</div><div class="sc-value" id="b-p1">£0</div></div>
+          <div class="split-card"><div class="sc-label">Partner spent</div><div class="sc-value" id="b-p2">£0</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Expenses</div>
+        <div id="expense-list"><div class="empty">No expenses yet.</div></div>
+        <div class="form-row">
+          <input type="text" id="exp-desc" placeholder="Description">
+          <input type="number" id="exp-amt" placeholder="£">
+          <select id="exp-cat">
+            <option>Flights</option><option>Accommodation</option><option>Diving</option>
+            <option>Sailing</option><option>Kitesurfing</option><option>Food</option>
+            <option>Transport</option><option>Activities</option><option>Other</option>
+          </select>
+          <select id="exp-who">
+            <option value="p1">Me</option><option value="p2">Partner</option><option value="both">Both</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="addExpense()">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div id="panel-packing" class="panel">
+      <div class="page-title">Packing list</div>
+      <p class="page-subtitle">Tick items off as you pack them</p>
+      <div class="card">
+        <div class="progress-row">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pack-prog" style="width:0%"></div></div>
+          <span class="progress-label" id="pack-label">0 / 0</span>
+        </div>
+        <div id="pack-container"></div>
+        <div class="form-row" style="margin-top:1rem">
+          <input type="text" id="pack-input" placeholder="Add item…">
+          <select id="pack-cat">
+            <option>Water sports</option><option>Hiking</option><option>Clothing</option>
+            <option>Documents</option><option>Health</option><option>Other</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="addPackItem()">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="status-bar" class="status-bar"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ── CONFIGURATION ── Replace these with your Supabase project values */
+const SUPABASE_URL      = 'https://dvrbanhjauioaravcwsz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_xs1H85v53ByygZoA5J90oA_jAOvE4jE';
+
+/* ── DEFAULT DATA ── */
+const DEFAULT_DAYS=[
+  {id:1,date:'Thu 7 Aug',label:'Arrival day',events:[{time:'PM',text:'Fly London → Corfu (CFU)',tag:'travel'},{time:'Eve',text:'Settle in, find a local taverna',tag:'free'}]},
+  {id:2,date:'Fri 8 Aug',label:'Corfu Old Town (UNESCO)',events:[{time:'AM',text:'Campiello district & Old Fortress',tag:'history'},{time:'PM',text:'New Fortress & Liston promenade',tag:'history'},{time:'Eve',text:'St Spyridon Church & evening stroll',tag:'history'}]},
+  {id:3,date:'Sat 9 Aug',label:'Diving day 1 — Kassiopi',events:[{time:'AM',text:'Intro/refresher dive at Kassiopi',tag:'dive'},{time:'PM',text:'Kruzeri reef — sargos & tsipoura',tag:'dive'},{time:'Eve',text:'Kassiopi fishing village',tag:'free'}]},
+  {id:4,date:'Sun 10 Aug',label:'Sailing day',events:[{time:'AM',text:'Charter from Gouvia Marina',tag:'sail'},{time:'noon',text:'Lunch on water + swim stop',tag:'sail'},{time:'PM',text:'Return to marina, explore Gouvia',tag:'free'}]},
+  {id:5,date:'Mon 11 Aug',label:'Hike — Afionas to Porto Timoni',events:[{time:'7am',text:'Afionas to Porto Timoni twin beaches',tag:'hike'},{time:'noon',text:'Swim at the twin beaches',tag:'free'},{time:'Eve',text:'Dinner in Afionas village',tag:'free'}]},
+  {id:6,date:'Tue 12 Aug',label:'Kitesurfing — Halikounas',events:[{time:'AM',text:'Drive to Halikounas / Issos beach',tag:'kite'},{time:'noon',text:'Corfu Kite Club session',tag:'kite'},{time:'PM',text:'Lake Korission nature walk & birdwatch',tag:'hike'}]},
+  {id:7,date:'Wed 13 Aug',label:'Achilleion & ancient sites',events:[{time:'AM',text:'Achilleion Palace & gardens',tag:'history'},{time:'PM',text:'Mon Repos estate & Paleopolis ruins',tag:'history'},{time:'Eve',text:'Evening swim at a quiet southern beach',tag:'free'}]},
+  {id:8,date:'Thu 14 Aug',label:'Wreck diving day',events:[{time:'AM',text:'Theodoros Wreck — 18m, Othonoi island',tag:'dive'},{time:'PM',text:'Second dive — the Hole of Ha cave',tag:'dive'},{time:'Eve',text:'Rest & fresh seafood dinner',tag:'free'}]},
+  {id:9,date:'Fri 15 Aug',label:'Mt. Pantokrator & Old Perithia',events:[{time:'7am',text:'Hike Mt. Pantokrator (906m)',tag:'hike'},{time:'noon',text:'Old Perithia medieval village',tag:'history'},{time:'PM',text:'Cape Drastis white cliffs (Peroulades)',tag:'hike'}]},
+  {id:10,date:'Sat 16 Aug',label:'Day sail to Paxos',events:[{time:'AM',text:'Sail south to Paxos island',tag:'sail'},{time:'noon',text:'Swim in Paxos sea caves',tag:'sail'},{time:'PM',text:'Return sail at sunset',tag:'sail'}]},
+  {id:11,date:'Sun 17 Aug',label:'Angelokastro & northwest',events:[{time:'AM',text:'Angelokastro Byzantine castle',tag:'history'},{time:'PM',text:'Paleokastritsa — snorkel sea caves',tag:'dive'},{time:'Eve',text:'Donkey Path walk to the bay',tag:'hike'}]},
+  {id:12,date:'Mon 18 Aug',label:'Departure',events:[{time:'AM',text:'Final morning swim',tag:'free'},{time:'noon',text:'Pack up + transfer to airport',tag:'travel'},{time:'PM',text:'Fly Corfu → London',tag:'travel'}]},
+];
+const DEFAULT_WISHES=['Night dive at Kassiopi','Day trip to Paxos by speedboat','Sea kayaking along the coast','Day trip to Albania (Butrint)','Kitesurfing beginner lesson','Hire a scooter for a day','Firefly evening walk in olive groves','Glass-bottom boat tour'];
+const DEFAULT_PACK={'Water sports':['Wetsuit / rash vest','Dive certification card','Snorkel & mask','Fins','Waterproof phone case','Kite harness','Reef-safe sunscreen'],'Hiking':['Trail shoes / boots','Hiking poles','2L water bottle','Headtorch','AllTrails maps (offline)','Sun hat','Lightweight rain layer'],'Clothing':['Swimwear x3','Light linen shirts','Evening wear','Flip flops','Sunglasses','Socks & underwear'],'Documents':['Passports','Travel insurance docs','GHIC / EHIC cards','Booking confirmations','Driving licence (car hire)'],'Health':['Sunscreen SPF 50+','After-sun lotion','Antihistamines','Seasickness tablets','Insect repellent','Basic first aid kit']};
+
+/* ── STATE ── */
+let sb=null,currentUser='p1',appState={},saveTimer=null;
+
+/* ── INIT ── */
+async function init(){
+  const configured=SUPABASE_URL!=='YOUR_SUPABASE_URL';
+  if(!configured){
+    document.getElementById('setup-banner').style.display='block';
+    setConn('err','Not configured');
+    loadLocal();render();return;
+  }
+  setConn('wait','Connecting…');
+  try{
+    sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    await loadFromDB();
+    setConn('ok','Live & synced');
+    subscribe();
+  }catch(e){
+    console.error(e);setConn('err','Offline mode');loadLocal();
+  }
+  render();
+}
+
+/* ── SUPABASE ── */
+async function loadFromDB(){
+  const{data,error}=await sb.from('planner_state').select('*').eq('trip_id','corfu2026').single();
+  if(error&&error.code==='PGRST116'){
+    const fresh=defaultState();
+    await sb.from('planner_state').insert({trip_id:'corfu2026',state:fresh});
+    appState=fresh;
+  }else if(error){throw error;}
+  else{appState=data.state;}
+  saveLocal();
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    saveLocal();
+    if(!sb)return;
+    try{await sb.from('planner_state').upsert({trip_id:'corfu2026',state:appState});flash('Saved ✓');}
+    catch(e){flash('Save failed');}
+  },800);
+}
+function subscribe(){
+  sb.channel('planner-sync')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'planner_state',filter:'trip_id=eq.corfu2026'},p=>{
+      appState=p.new.state;saveLocal();render();flash('Updated by partner');
+    }).subscribe();
+}
+
+/* ── LOCAL STORAGE ── */
+function saveLocal(){try{localStorage.setItem('corfu2026',JSON.stringify(appState));}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem('corfu2026');appState=r?JSON.parse(r):defaultState();}catch(e){appState=defaultState();}}
+function defaultState(){
+  const pack={};
+  Object.entries(DEFAULT_PACK).forEach(([cat,items])=>{pack[cat]=items.map(t=>({text:t,checked:false}));});
+  return{days:DEFAULT_DAYS.map(d=>({...d,events:d.events.map(e=>({...e}))})),wishes:DEFAULT_WISHES.map(t=>({text:t,votes:{p1:false,p2:false}})),expenses:[],budget:0,pack};
+}
+
+/* ── UI HELPERS ── */
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function setUser(u,btn){
+  currentUser=u;
+  document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWishlist();
+}
+function setConn(type,text){
+  const el=document.getElementById('conn-badge');
+  el.className='conn-badge conn-'+type;
+  el.innerHTML=`<div class="conn-dot"></div><span>${text}</span>`;
+}
+let stTimer;
+function flash(msg){
+  const el=document.getElementById('status-bar');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(stTimer);stTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function render(){renderItinerary();renderWishlist();renderBudget();renderPacking();}
+
+/* ── ITINERARY ── */
+function renderItinerary(){
+  const c=document.getElementById('days-container');c.innerHTML='';
+  appState.days.forEach((day,di)=>{
+    const wrap=document.createElement('div');wrap.className='day-row';
+    const hdr=document.createElement('div');hdr.className='day-header';
+    hdr.innerHTML=`<div class="day-header-left"><div class="day-num">${day.id}</div><div><div class="day-name">${day.date}</div><div class="day-theme">${day.label}</div></div></div><span class="day-chevron${di<2?' open':''}" id="chev-${di}">▼</span>`;
+    const body=document.createElement('div');body.className='day-body';body.id='db-'+di;
+    if(di<2)body.style.display='block';
+    hdr.onclick=()=>{const open=body.style.display==='block';body.style.display=open?'none':'block';document.getElementById('chev-'+di).classList.toggle('open',!open);};
+    const evList=document.createElement('div');evList.className='event-list';
+    day.events.forEach((ev,ei)=>{
+      const row=document.createElement('div');row.className='event-item';
+      row.innerHTML=`<span class="event-time">${ev.time}</span><span class="event-text">${ev.text}</span><span class="tag tag-${ev.tag}">${ev.tag}</span><button class="del-btn" onclick="removeEvent(${di},${ei})" aria-label="remove">✕</button>`;
+      evList.appendChild(row);
+    });
+    const addForm=document.createElement('div');addForm.className='add-event-form';
+    addForm.innerHTML=`<input type="text" name="text" placeholder="Add event…"><input type="text" name="time" placeholder="time" style="width:58px"><select name="tag"><option value="dive">Dive</option><option value="sail">Sail</option><option value="kite">Kite</option><option value="hike">Hike</option><option value="history">History</option><option value="free">Free</option><option value="travel">Travel</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(${di},this)">+ Add</button>`;
+    body.appendChild(evList);body.appendChild(addForm);
+    wrap.appendChild(hdr);wrap.appendChild(body);c.appendChild(wrap);
+  });
+}
+function removeEvent(di,ei){appState.days[di].events.splice(ei,1);scheduleSave();renderItinerary();}
+function addEvent(di,btn){
+  const f=btn.closest('.add-event-form');
+  const text=f.querySelector('[name=text]').value.trim();
+  const time=f.querySelector('[name=time]').value.trim();
+  const tag=f.querySelector('[name=tag]').value;
+  if(!text)return;
+  appState.days[di].events.push({time,text,tag});
+  f.querySelector('[name=text]').value='';f.querySelector('[name=time]').value='';
+  scheduleSave();renderItinerary();
+}
+
+/* ── WISHLIST ── */
+function renderWishlist(){
+  const c=document.getElementById('wish-list');
+  if(!appState.wishes.length){c.innerHTML='<div class="empty">No activities yet.</div>';return;}
+  c.innerHTML='';
+  appState.wishes.forEach((w,i)=>{
+    const total=(w.votes.p1?1:0)+(w.votes.p2?1:0);
+    const myVote=w.votes[currentUser];
+    const div=document.createElement('div');div.className='wish-item';
+    div.innerHTML=`<span class="wish-name">${w.text}</span>${total===2?'<span class="wish-badge">✓ Agreed</span>':''}<div class="wish-votes"><button class="vote-btn${myVote?' voted':''}" onclick="toggleVote(${i})">${myVote?'✓ Voted':'Vote'}</button><span class="vote-tally${total===2?' full':''}">${total}/2</span></div><button class="del-btn" onclick="removeWish(${i})" aria-label="remove">✕</button>`;
+    c.appendChild(div);
+  });
+}
+function toggleVote(i){appState.wishes[i].votes[currentUser]=!appState.wishes[i].votes[currentUser];scheduleSave();renderWishlist();}
+function removeWish(i){appState.wishes.splice(i,1);scheduleSave();renderWishlist();}
+function addWish(){
+  const inp=document.getElementById('wish-input');const v=inp.value.trim();
+  if(!v)return;appState.wishes.push({text:v,votes:{p1:false,p2:false}});inp.value='';
+  scheduleSave();renderWishlist();
+}
+
+/* ── BUDGET ── */
+function renderBudget(){
+  const exps=appState.expenses||[];const budget=appState.budget||0;
+  const spent=exps.reduce((a,e)=>a+e.amount,0);
+  const p1=exps.filter(e=>e.who==='p1').reduce((a,e)=>a+e.amount,0);
+  const p2=exps.filter(e=>e.who==='p2').reduce((a,e)=>a+e.amount,0);
+  const remain=budget-spent;const pct=budget>0?Math.min(100,Math.round(spent/budget*100)):0;
+  document.getElementById('b-total').textContent=budget>0?'£'+budget.toLocaleString():'£–';
+  document.getElementById('b-spent').textContent='£'+Math.round(spent).toLocaleString();
+  document.getElementById('b-remain').textContent=budget>0?'£'+Math.round(remain).toLocaleString():'£–';
+  document.getElementById('b-pct').textContent=pct+'%';
+  document.getElementById('b-bar').style.width=pct+'%';
+  document.getElementById('b-bar').classList.toggle('over',remain<0);
+  document.getElementById('b-p1').textContent='£'+Math.round(p1).toLocaleString();
+  document.getElementById('b-p2').textContent='£'+Math.round(p2).toLocaleString();
+  document.getElementById('budget-amt').value=budget||'';
+  const c=document.getElementById('expense-list');
+  if(!exps.length){c.innerHTML='<div class="empty">No expenses yet.</div>';return;}
+  c.innerHTML='';
+  exps.forEach((exp,i)=>{
+    const wc=exp.who==='p1'?'who-p1':exp.who==='p2'?'who-p2':'who-both';
+    const wl=exp.who==='p1'?'Y':exp.who==='p2'?'P':'B';
+    const div=document.createElement('div');div.className='expense-item';
+    div.innerHTML=`<div class="who-dot ${wc}">${wl}</div><div class="exp-info"><div class="exp-name">${exp.desc}</div><div class="exp-cat">${exp.cat}</div></div><div class="exp-amt">£${Math.round(exp.amount).toLocaleString()}</div><button class="del-btn" onclick="removeExpense(${i})" aria-label="remove">✕</button>`;
+    c.appendChild(div);
+  });
+}
+function saveBudget(){appState.budget=parseFloat(document.getElementById('budget-amt').value)||0;scheduleSave();renderBudget();}
+function addExpense(){
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amount=parseFloat(document.getElementById('exp-amt').value);
+  const cat=document.getElementById('exp-cat').value;
+  const who=document.getElementById('exp-who').value;
+  if(!desc||!amount)return;
+  appState.expenses.push({desc,amount,cat,who});
+  document.getElementById('exp-desc').value='';document.getElementById('exp-amt').value='';
+  scheduleSave();renderBudget();
+}
+function removeExpense(i){appState.expenses.splice(i,1);scheduleSave();renderBudget();}
+
+/* ── PACKING ── */
+const CAT_ICONS={'Water sports':'🤿','Hiking':'🥾','Clothing':'👕','Documents':'📄','Health':'💊','Other':'📦'};
+function renderPacking(){
+  const container=document.getElementById('pack-container');container.innerHTML='';
+  let total=0,done=0;
+  Object.entries(appState.pack).forEach(([cat,items])=>{
+    const sec=document.createElement('div');
+    sec.innerHTML=`<div class="pack-cat-title">${CAT_ICONS[cat]||'📦'} ${cat}</div><div class="pack-grid" id="pg-${cat.replace(/\s/g,'_')}"></div>`;
+    container.appendChild(sec);
+    const grid=sec.querySelector('.pack-grid');
+    items.forEach((item,i)=>{
+      total++;if(item.checked)done++;
+      const el=document.createElement('div');el.className='pack-item'+(item.checked?' checked':'');
+      el.innerHTML=`<div class="pack-check"><span class="pack-checkmark">✓</span></div><span class="pack-label">${item.text}</span>`;
+      el.onclick=()=>togglePack(cat,i);
+      grid.appendChild(el);
+    });
+  });
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('pack-prog').style.width=pct+'%';
+  document.getElementById('pack-label').textContent=`${done} / ${total} packed`;
+}
+function togglePack(cat,i){appState.pack[cat][i].checked=!appState.pack[cat][i].checked;scheduleSave();renderPacking();}
+function addPackItem(){
+  const text=document.getElementById('pack-input').value.trim();
+  const cat=document.getElementById('pack-cat').value;
+  if(!text)return;
+  if(!appState.pack[cat])appState.pack[cat]=[];
+  appState.pack[cat].push({text,checked:false});
+  document.getElementById('pack-input').value='';
+  scheduleSave();renderPacking();
+}
+init();
+</script>
+</body>
+</html>
