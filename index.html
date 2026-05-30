@@ -1620,7 +1620,7 @@ async function loadFromDB(){
 function scheduleSave(){
   clearTimeout(saveTimer);
   // Immediately refresh calendar if it's visible
-  if(document.getElementById('panel-calendar').classList.contains('active'))renderCalendar();
+  if(document.getElementById('panel-dashboard').classList.contains('active'))renderCalendar();
   saveTimer=setTimeout(async()=>{
     saveLocal();if(!sb||!currentSession)return;
     try{await sb.from('planner_state').upsert({trip_id:'corfu2026',state:appState});flash('Saved ✓');}
