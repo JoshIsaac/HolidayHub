@@ -1779,7 +1779,12 @@ async function loadFromDB(){
   const{data,error}=await sb.from('planner_state').select('*').eq('trip_id','corfu2026').single();
   if(error&&error.code==='PGRST116'){const f=defaultState();await sb.from('planner_state').insert({trip_id:'corfu2026',state:f});appState=f;}
   else if(error)throw error;
-  else appState=data.state;
+  else{
+    appState=data.state;
+    if(!appState.notes)appState.notes=[];
+    if(!appState.tasks)appState.tasks=[];
+    if(!appState.pins)appState.pins=DEFAULT_PINS.map(p=>({...p}));
+  }
   saveLocal();
 }
 function scheduleSave(){
