@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -135,7 +137,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .tag-hike{background:#E8F5E0;color:#2D6B1A;border-color:transparent}
 .tag-history{background:#EDE8FC;color:#4A35A0;border-color:transparent}
 .tag-free{background:var(--sand2);color:var(--ink2);border-color:transparent}
-.tag-travel{background:var(--coral-lt);color:var(--coral);border-color:transparent} .tag-general{background:var(--sand2);color:var(--ink);border-color:transparent} .tag-explore{background:var(--sea-lt);color:var(--sea2);border-color:transparent}color:var(--coral);border-color:transparent}
+.tag-travel{background:var(--coral-lt);color:var(--coral);border-color:transparent}
+.tag-general{background:var(--sand2);color:var(--ink);border-color:transparent}
+.tag-explore{background:var(--sea-lt);color:var(--sea2);border-color:transparent}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:.9rem;padding:0 2px;line-height:1;opacity:.4;transition:opacity .15s;flex-shrink:0}
 .del-btn:hover{opacity:1;color:var(--coral)}
 .add-event-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
@@ -235,7 +239,45 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 
 /* ── MAP ── */
 #map{height:75vh;border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:1rem}
-.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.map-search-wrap{position:relative;margin-bottom:.75rem}
+.map-search-input{width:100%;font-family:'DM Sans',sans-serif;font-size:.88rem;padding:9px 36px 9px 36px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--ink);outline:none}
+.map-search-input:focus{border-color:var(--sea2)}
+.map-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;font-size:.9rem}
+.map-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink3);font-size:.9rem;line-height:1;padding:2px}
+.map-search-clear:hover{color:var(--ink)}
+.map-autocomplete{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.1);max-height:220px;overflow-y:auto}
+.map-ac-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:.82rem}
+.map-ac-item:last-child{border-bottom:none}
+.map-ac-item:hover,.map-ac-item.selected{background:var(--sea-lt)}
+.map-ac-name{font-weight:500;color:var(--ink);margin-bottom:1px}
+.map-ac-sub{font-size:.75rem;color:var(--ink3)}
+.map-hover-card{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;width:200px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:450;pointer-events:none;transition:opacity .15s}
+.map-hover-card::after{content:'';position:absolute;bottom:-6px;left:16px;width:10px;height:10px;background:var(--white);border-right:1px solid var(--border);border-bottom:1px solid var(--border);transform:rotate(45deg)}
+.map-hover-title{font-weight:500;font-size:.85rem;color:var(--ink);margin-bottom:3px}
+.map-hover-note{font-size:.75rem;color:var(--ink3);line-height:1.5;margin-top:3px}
+.dir-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:.75rem}
+.dir-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s}
+.dir-header:hover{background:var(--sand)}
+.dir-header-title{font-size:.875rem;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:8px}
+.dir-body{padding:12px 14px;border-top:1px solid var(--border)}
+.dir-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dir-point{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.dir-point-a{background:var(--teal-lt);color:var(--teal)}
+.dir-point-b{background:var(--coral-lt);color:var(--coral)}
+.dir-input{flex:1;font-family:'DM Sans',sans-serif;font-size:.82rem;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none}
+.dir-input:focus{border-color:var(--sea2)}
+.dir-mode-row{display:flex;gap:6px;margin-bottom:10px}
+.dir-mode-btn{flex:1;font-family:'DM Sans',sans-serif;font-size:.78rem;padding:6px 0;border-radius:7px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;gap:5px;transition:all .12s}
+.dir-mode-btn.active{background:var(--sea);color:var(--white);border-color:var(--sea)}
+.dir-result{background:var(--sand);border-radius:var(--radius);padding:10px 12px;display:flex;gap:0}
+.dir-stat{flex:1;text-align:center}
+.dir-stat-val{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink)}
+.dir-stat-lbl{font-size:.72rem;color:var(--ink3);margin-top:2px}
+.dir-divider{width:1px;background:var(--border);margin:0 8px}
+.dir-error{font-size:.82rem;color:var(--coral);padding:8px 0;text-align:center}
+.tile-toggle{display:flex;background:var(--sand);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px}
+.tile-btn{font-family:'DM Sans',sans-serif;font-size:.75rem;padding:4px 12px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--ink3);transition:all .12s}
+.tile-btn.active{background:var(--white);color:var(--ink);border:1px solid var(--border)}
 .map-legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s}
 .map-legend-item.active{font-weight:500}
 .map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -532,13 +574,65 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
     <!-- MAP -->
     <div id="panel-map" class="panel">
       <div class="page-title">Map</div>
-      <p class="page-subtitle">All locations · click any pin to view or edit · use legend to filter</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <p class="page-subtitle">Search for places · hover pins for details · get directions below</p>
+      <div class="map-search-wrap">
+        <span class="map-search-icon">🔍</span>
+        <input class="map-search-input" id="map-search" type="text" placeholder="Search for a place or address on Corfu…" autocomplete="off"
+          oninput="onMapSearch(this.value)" onkeydown="onMapSearchKey(event)">
+        <button class="map-search-clear" id="map-search-clear" style="display:none" onclick="clearMapSearch()">✕</button>
+        <div class="map-autocomplete" id="map-autocomplete" style="display:none"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;gap:8px;flex-wrap:wrap">
         <div class="map-legend" id="map-legend" style="margin:0;flex:1"></div>
-        <button class="btn btn-primary btn-sm" style="flex-shrink:0;margin-left:8px" onclick="openPinModal()">+ Add pin</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <div class="tile-toggle">
+            <button class="tile-btn active" id="tile-map" onclick="setTileLayer('map')">🗺 Map</button>
+            <button class="tile-btn" id="tile-sat" onclick="setTileLayer('satellite')">🛰 Satellite</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openPinModal()">+ Add pin</button>
+        </div>
       </div>
       <div id="map"></div>
-      <p style="font-size:.75rem;color:var(--ink3);margin-top:4px">Click any pin to view details or edit.</p>
+      <div class="dir-panel">
+        <div class="dir-header" onclick="toggleDirPanel()">
+          <div class="dir-header-title">🗺 Directions & travel time</div>
+          <span id="dir-chevron" style="font-size:.8rem;color:var(--ink3);transition:transform .2s">▼</span>
+        </div>
+        <div class="dir-body" id="dir-body" style="display:none">
+          <div class="dir-row">
+            <div class="dir-point dir-point-a">A</div>
+            <input class="dir-input" id="dir-from" placeholder="From — type address or pick a pin…" autocomplete="off" oninput="onDirSearch('from',this.value)">
+            <button class="btn btn-sm" onclick="pickDirPin('from')" title="Pick from map pins">📍</button>
+          </div>
+          <div id="dir-from-ac" class="map-autocomplete" style="display:none;position:relative;top:0;margin:-4px 0 8px 30px"></div>
+          <div class="dir-row">
+            <div class="dir-point dir-point-b">B</div>
+            <input class="dir-input" id="dir-to" placeholder="To — type address or pick a pin…" autocomplete="off" oninput="onDirSearch('to',this.value)">
+            <button class="btn btn-sm" onclick="pickDirPin('to')" title="Pick from map pins">📍</button>
+          </div>
+          <div id="dir-to-ac" class="map-autocomplete" style="display:none;position:relative;top:0;margin:-4px 0 8px 30px"></div>
+          <div class="dir-mode-row">
+            <button class="dir-mode-btn active" id="dir-mode-car" onclick="setDirMode('car')">🚗 Driving</button>
+            <button class="dir-mode-btn" id="dir-mode-walk" onclick="setDirMode('walk')">🚶 Walking</button>
+          </div>
+          <button class="btn btn-primary btn-sm" style="width:100%;margin-bottom:10px" onclick="getDirections()">Get directions</button>
+          <div id="dir-result" style="display:none">
+            <div class="dir-result">
+              <div class="dir-stat"><div class="dir-stat-val" id="dir-dist">—</div><div class="dir-stat-lbl">Distance</div></div>
+              <div class="dir-divider"></div>
+              <div class="dir-stat"><div class="dir-stat-val" id="dir-time">—</div><div class="dir-stat-lbl" id="dir-time-lbl">Travel time</div></div>
+              <div class="dir-divider"></div>
+              <div class="dir-stat"><div class="dir-stat-val" id="dir-alt-time">—</div><div class="dir-stat-lbl" id="dir-alt-lbl">Walking</div></div>
+            </div>
+            <button class="btn btn-sm btn-primary" style="width:100%;margin-top:8px" onclick="showRouteOnMap()">Show route on map ↗</button>
+          </div>
+          <div id="dir-error" class="dir-error" style="display:none"></div>
+          <div id="dir-pin-picker" style="display:none;margin-top:8px">
+            <div style="font-size:.78rem;color:var(--ink3);margin-bottom:6px">Pick a saved pin:</div>
+            <div id="dir-pin-list" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ITINERARY -->
@@ -1409,6 +1503,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 <div id="status-bar" class="status-bar"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" onerror="loadSupabaseFallback()"></script>
 <script>
 function loadSupabaseFallback(){
@@ -1726,7 +1821,7 @@ function flash(msg){const el=document.getElementById('status-bar');el.textConten
 function render(){
   renderItinerary();renderWishlist();renderBudget();renderPacking();
   if(leafletMap)renderMapMarkers();
-  if(document.getElementById('panel-calendar').classList.contains('active'))renderCalendar();
+  if(document.getElementById('panel-dashboard').classList.contains('active'))renderCalendar();
 }
 
 /* ══ DRAG HELPERS ══ */
@@ -2033,10 +2128,21 @@ function renderWeather(){
 }
 
 /* ══ MAP ══ */
+let tileLayer=null,satelliteLayer=null,clusterGroup=null,routeLayer=null;
+let dirMode='car',dirFromCoords=null,dirToCoords=null;
+let searchDebounce=null,dirDebounce=null,acSelectedIdx=-1;
+let hoverCard=null,hoverTimeout=null;
+
+const TILE_URL='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const SAT_URL='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
 function initMap(){
   if(leafletMap)return;
   leafletMap=L.map('map').setView([39.63,19.82],11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18}).addTo(leafletMap);
+  tileLayer=L.tileLayer(TILE_URL,{attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19}).addTo(leafletMap);
+  satelliteLayer=L.tileLayer(SAT_URL,{attribution:'© Esri',maxZoom:19});
+  clusterGroup=L.markerClusterGroup({maxClusterRadius:50,spiderfyOnMaxZoom:true,showCoverageOnHover:false});
+  leafletMap.addLayer(clusterGroup);
   leafletMap.on('click',e=>{
     if(!pickingCoords)return;
     document.getElementById('pin-lat').value=e.latlng.lat.toFixed(4);
@@ -2046,9 +2152,26 @@ function initMap(){
     document.getElementById('pin-pick-hint').textContent='📍 Coordinates set! Fill in the details and save.';
     flash('Coordinates picked ✓');
   });
+  leafletMap.on('click',()=>hideHoverCard());
   if(!appState.pins)appState.pins=DEFAULT_PINS.map(p=>({...p}));
   renderMapLegend();renderMapMarkers();
 }
+
+function setTileLayer(type){
+  if(!leafletMap)return;
+  if(type==='satellite'){
+    leafletMap.removeLayer(tileLayer);
+    satelliteLayer.addTo(leafletMap);
+    document.getElementById('tile-map').classList.remove('active');
+    document.getElementById('tile-sat').classList.add('active');
+  }else{
+    leafletMap.removeLayer(satelliteLayer);
+    tileLayer.addTo(leafletMap);
+    document.getElementById('tile-sat').classList.remove('active');
+    document.getElementById('tile-map').classList.add('active');
+  }
+}
+
 function renderMapLegend(){
   const c=document.getElementById('map-legend');c.innerHTML='';
   Object.entries(CAT_STYLE).forEach(([cat,style])=>{
@@ -2060,19 +2183,272 @@ function renderMapLegend(){
     c.appendChild(el);
   });
 }
+
 function renderMapMarkers(){
-  markers.forEach(m=>m.remove());markers=[];
+  if(!clusterGroup)return;
+  clusterGroup.clearLayers();markers=[];
   if(!appState.pins)return;
   appState.pins.forEach((loc,idx)=>{
     if(!activeFilters.has(loc.cat))return;
     const style=CAT_STYLE[loc.cat]||{color:'#666',bg:'#eee',icon:'📍'};
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.16 0 0 7.16 0 16c0 10.5 14 24 16 24s16-13.5 16-24C32 7.16 24.84 0 16 0z" fill="${style.color}"/><circle cx="16" cy="16" r="10" fill="white" opacity="0.9"/><text x="16" y="21" text-anchor="middle" font-size="12">${style.icon}</text></svg>`;
     const icon=L.divIcon({html:svg,className:'',iconSize:[32,40],iconAnchor:[16,40],popupAnchor:[0,-42]});
-    const noteBtnHtml=loc.noteLink?`<button class="popup-btn" onclick="openNoteFromPin('${loc.noteLink}')">📝 Note</button>`:'';
-    const popup=`<div class="popup-title">${loc.name}</div><span class="popup-cat" style="background:${style.bg};color:${style.color}">${style.icon} ${loc.cat}</span><div class="popup-note">${loc.note||''}</div><div class="popup-actions"><button class="popup-btn" onclick="editPin(${idx})">✏ Edit</button>${noteBtnHtml}<button class="popup-btn popup-btn-danger" onclick="deletePin(${idx})">✕ Remove</button></div>`;
-    const m=L.marker([loc.lat,loc.lng],{icon}).addTo(leafletMap).bindPopup(popup);
+    const m=L.marker([loc.lat,loc.lng],{icon});
+    m.on('mouseover',e=>showHoverCard(loc,idx,e));
+    m.on('mouseout',()=>{hoverTimeout=setTimeout(hideHoverCard,300);});
+    m.on('click',()=>editPin(idx));
+    clusterGroup.addLayer(m);
     markers.push(m);
   });
+}
+
+function showHoverCard(loc,idx,e){
+  clearTimeout(hoverTimeout);
+  hideHoverCard();
+  const style=CAT_STYLE[loc.cat]||{color:'#666',bg:'#eee',icon:'📍'};
+  const card=document.createElement('div');
+  card.className='map-hover-card';
+  card.id='map-hover-card';
+  const noteBtnHtml=loc.noteLink?`<button class="popup-btn" style="pointer-events:all" onclick="openNoteFromPin('${loc.noteLink}')">📝 Note</button>`:'';
+  card.innerHTML=`
+    <span class="popup-cat" style="background:${style.bg};color:${style.color}">${style.icon} ${loc.cat}</span>
+    <div class="map-hover-title">${loc.name}</div>
+    ${loc.note?`<div class="map-hover-note">${loc.note.slice(0,80)}${loc.note.length>80?'…':''}</div>`:''}
+    <div class="popup-actions" style="pointer-events:all;margin-top:6px">
+      <button class="popup-btn" onclick="editPin(${idx})">✏ Edit</button>
+      ${noteBtnHtml}
+      <button class="popup-btn" onclick="prefillDirFrom('${loc.name.replace(/'/g,"\\'")}',${loc.lat},${loc.lng})">🗺 Directions</button>
+    </div>`;
+  card.style.pointerEvents='none';
+  card.onmouseenter=()=>clearTimeout(hoverTimeout);
+  card.onmouseleave=()=>{hoverTimeout=setTimeout(hideHoverCard,300);};
+  card.style.pointerEvents='all';
+  const mapEl=document.getElementById('map');
+  const mapRect=mapEl.getBoundingClientRect();
+  const pt=e.containerPoint;
+  card.style.left=(pt.x-16)+'px';
+  card.style.top=(pt.y-140)+'px';
+  mapEl.appendChild(card);
+  hoverCard=card;
+}
+
+function hideHoverCard(){
+  const existing=document.getElementById('map-hover-card');
+  if(existing)existing.remove();
+  hoverCard=null;
+}
+
+/* ══ MAP SEARCH ══ */
+let acResults=[];
+function onMapSearch(val){
+  const clear=document.getElementById('map-search-clear');
+  clear.style.display=val?'block':'none';
+  clearTimeout(searchDebounce);
+  const ac=document.getElementById('map-autocomplete');
+  if(!val||val.length<3){ac.style.display='none';acResults=[];acSelectedIdx=-1;return;}
+  searchDebounce=setTimeout(()=>fetchNominatim(val,'map'),500);
+}
+
+function onMapSearchKey(e){
+  const ac=document.getElementById('map-autocomplete');
+  const items=ac.querySelectorAll('.map-ac-item');
+  if(e.key==='ArrowDown'){e.preventDefault();acSelectedIdx=Math.min(acSelectedIdx+1,items.length-1);items.forEach((el,i)=>el.classList.toggle('selected',i===acSelectedIdx));}
+  else if(e.key==='ArrowUp'){e.preventDefault();acSelectedIdx=Math.max(acSelectedIdx-1,0);items.forEach((el,i)=>el.classList.toggle('selected',i===acSelectedIdx));}
+  else if(e.key==='Enter'&&acSelectedIdx>=0){items[acSelectedIdx]?.click();}
+  else if(e.key==='Escape'){clearMapSearch();}
+}
+
+async function fetchNominatim(query,target,callback){
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query+', Corfu, Greece')}&format=json&limit=5&addressdetails=1`;
+    const res=await fetch(url,{headers:{'Accept-Language':'en'}});
+    const data=await res.json();
+    if(target==='map')showMapAC(data);
+    else if(callback)callback(data);
+  }catch(e){console.warn('Nominatim error',e);}
+}
+
+function showMapAC(results){
+  acResults=results;acSelectedIdx=-1;
+  const ac=document.getElementById('map-autocomplete');
+  if(!results.length){ac.style.display='none';return;}
+  ac.innerHTML='';
+  results.forEach((r,i)=>{
+    const div=document.createElement('div');div.className='map-ac-item';
+    const name=r.display_name.split(',').slice(0,2).join(',');
+    const sub=r.display_name.split(',').slice(2,4).join(',').trim();
+    div.innerHTML=`<span style="font-size:1rem;flex-shrink:0">📍</span><div><div class="map-ac-name">${name}</div><div class="map-ac-sub">${sub}</div></div>`;
+    div.onclick=()=>selectMapAC(r);
+    ac.appendChild(div);
+  });
+  ac.style.display='block';
+}
+
+function selectMapAC(r){
+  const lat=parseFloat(r.lat),lng=parseFloat(r.lon);
+  document.getElementById('map-autocomplete').style.display='none';
+  document.getElementById('map-search').value=r.display_name.split(',').slice(0,2).join(',');
+  document.getElementById('map-search-clear').style.display='block';
+  if(leafletMap){leafletMap.setView([lat,lng],15);}
+  openPinModal();
+  setTimeout(()=>{
+    document.getElementById('pin-lat').value=lat.toFixed(4);
+    document.getElementById('pin-lng').value=lng.toFixed(4);
+    const nameGuess=r.display_name.split(',')[0];
+    document.getElementById('pin-name').value=nameGuess;
+    document.getElementById('pin-pick-hint').style.display='none';
+    pickingCoords=false;
+  },60);
+}
+
+function clearMapSearch(){
+  document.getElementById('map-search').value='';
+  document.getElementById('map-search-clear').style.display='none';
+  document.getElementById('map-autocomplete').style.display='none';
+  acResults=[];acSelectedIdx=-1;
+}
+
+/* ══ DIRECTIONS ══ */
+let dirOpen=false;
+function toggleDirPanel(){
+  dirOpen=!dirOpen;
+  document.getElementById('dir-body').style.display=dirOpen?'block':'none';
+  document.getElementById('dir-chevron').style.transform=dirOpen?'rotate(180deg)':'';
+}
+
+function setDirMode(mode){
+  dirMode=mode;
+  document.getElementById('dir-mode-car').classList.toggle('active',mode==='car');
+  document.getElementById('dir-mode-walk').classList.toggle('active',mode==='walk');
+}
+
+function onDirSearch(which,val){
+  clearTimeout(dirDebounce);
+  const acEl=document.getElementById(`dir-${which}-ac`);
+  if(!val||val.length<3){acEl.style.display='none';return;}
+  dirDebounce=setTimeout(async()=>{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val+', Corfu, Greece')}&format=json&limit=4&addressdetails=1`;
+    try{
+      const res=await fetch(url,{headers:{'Accept-Language':'en'}});
+      const data=await res.json();
+      acEl.innerHTML='';
+      if(!data.length){acEl.style.display='none';return;}
+      data.forEach(r=>{
+        const div=document.createElement('div');div.className='map-ac-item';
+        const name=r.display_name.split(',').slice(0,2).join(',');
+        div.innerHTML=`<span style="font-size:.9rem;flex-shrink:0">📍</span><div class="map-ac-name">${name}</div>`;
+        div.onclick=()=>{
+          document.getElementById(`dir-${which}`).value=name;
+          if(which==='from'){dirFromCoords=[parseFloat(r.lat),parseFloat(r.lon)];}
+          else{dirToCoords=[parseFloat(r.lat),parseFloat(r.lon)];}
+          acEl.style.display='none';
+        };
+        acEl.appendChild(div);
+      });
+      acEl.style.display='block';
+    }catch(e){}
+  },400);
+}
+
+let pickingDirTarget=null;
+function pickDirPin(which){
+  pickingDirTarget=which;
+  const list=document.getElementById('dir-pin-list');
+  list.innerHTML='';
+  (appState.pins||[]).forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='btn btn-sm';btn.style.fontSize='.75rem';
+    btn.textContent=p.name;
+    btn.onclick=()=>{
+      document.getElementById(`dir-${which}`).value=p.name;
+      if(which==='from')dirFromCoords=[p.lat,p.lng];
+      else dirToCoords=[p.lat,p.lng];
+      document.getElementById('dir-pin-picker').style.display='none';
+    };
+    list.appendChild(btn);
+  });
+  document.getElementById('dir-pin-picker').style.display='block';
+}
+
+function prefillDirFrom(name,lat,lng){
+  if(!dirOpen)toggleDirPanel();
+  document.getElementById('dir-from').value=name;
+  dirFromCoords=[lat,lng];
+  document.getElementById('dir-pin-picker').style.display='none';
+  flash('Point A set — now pick a destination');
+}
+
+async function getDirections(){
+  const errEl=document.getElementById('dir-error');
+  const resEl=document.getElementById('dir-result');
+  errEl.style.display='none';resEl.style.display='none';
+  if(!dirFromCoords){
+    const fromVal=document.getElementById('dir-from').value.trim();
+    if(!fromVal){errEl.textContent='Please enter a starting point.';errEl.style.display='block';return;}
+    const fromData=await geocodeOnce(fromVal);
+    if(!fromData){errEl.textContent='Could not find starting point.';errEl.style.display='block';return;}
+    dirFromCoords=[parseFloat(fromData.lat),parseFloat(fromData.lon)];
+  }
+  if(!dirToCoords){
+    const toVal=document.getElementById('dir-to').value.trim();
+    if(!toVal){errEl.textContent='Please enter a destination.';errEl.style.display='block';return;}
+    const toData=await geocodeOnce(toVal);
+    if(!toData){errEl.textContent='Could not find destination.';errEl.style.display='block';return;}
+    dirToCoords=[parseFloat(toData.lat),parseFloat(toData.lon)];
+  }
+  try{
+    const [carData,walkData]=await Promise.all([
+      fetchRoute(dirFromCoords,dirToCoords,'car'),
+      fetchRoute(dirFromCoords,dirToCoords,'foot')
+    ]);
+    if(!carData&&!walkData){errEl.textContent='Could not calculate route. Try different locations.';errEl.style.display='block';return;}
+    const primary=carData||walkData;
+    const distKm=(primary.distance/1000).toFixed(1);
+    const carMins=carData?Math.round(carData.duration/60):null;
+    const walkMins=walkData?Math.round(walkData.duration/60):null;
+    document.getElementById('dir-dist').textContent=distKm+' km';
+    if(dirMode==='car'&&carData){
+      document.getElementById('dir-time').textContent=carMins>=60?`${Math.floor(carMins/60)}h ${carMins%60}m`:carMins+'m';
+      document.getElementById('dir-time-lbl').textContent='Drive time';
+      document.getElementById('dir-alt-time').textContent=walkMins?walkMins>=60?`${Math.floor(walkMins/60)}h ${walkMins%60}m`:walkMins+'m':'—';
+      document.getElementById('dir-alt-lbl').textContent='Walking';
+    }else{
+      document.getElementById('dir-time').textContent=walkMins>=60?`${Math.floor(walkMins/60)}h ${walkMins%60}m`:walkMins+'m';
+      document.getElementById('dir-time-lbl').textContent='Walk time';
+      document.getElementById('dir-alt-time').textContent=carMins?carMins+'m':'—';
+      document.getElementById('dir-alt-lbl').textContent='Driving';
+    }
+    window._lastRouteGeom=primary.geometry;
+    resEl.style.display='block';
+  }catch(e){errEl.textContent='Routing failed — please try again.';errEl.style.display='block';}
+}
+
+async function geocodeOnce(query){
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query+', Corfu, Greece')}&format=json&limit=1`;
+    const res=await fetch(url,{headers:{'Accept-Language':'en'}});
+    const data=await res.json();
+    return data[0]||null;
+  }catch(e){return null;}
+}
+
+async function fetchRoute(from,to,profile){
+  try{
+    const url=`https://router.project-osrm.org/route/v1/${profile}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(data.code!=='Ok'||!data.routes.length)return null;
+    return{distance:data.routes[0].distance,duration:data.routes[0].duration,geometry:data.routes[0].geometry};
+  }catch(e){return null;}
+}
+
+function showRouteOnMap(){
+  if(!window._lastRouteGeom||!leafletMap)return;
+  if(routeLayer){leafletMap.removeLayer(routeLayer);routeLayer=null;}
+  routeLayer=L.geoJSON(window._lastRouteGeom,{style:{color:dirMode==='car'?'#1B5E7B':'#1A7A6A',weight:4,opacity:.75}}).addTo(leafletMap);
+  const bounds=routeLayer.getBounds();
+  if(bounds.isValid())leafletMap.fitBounds(bounds,{padding:[40,40]});
+  flash('Route shown on map');
 }
 
 /* ══ PIN MODAL ══ */
@@ -2091,10 +2467,10 @@ function openPinModal(idx){
     document.getElementById('pin-note').value=p.note||'';
   }else{
     title.textContent='Add map pin';
-    hint.style.display='block';hint.textContent='📍 Click anywhere on the map to set coordinates, then fill in the details.';
+    hint.style.display='block';hint.textContent='📍 Click on the map to set coordinates, or use the search bar above.';
     document.getElementById('pin-name').value='';document.getElementById('pin-lat').value='';
     document.getElementById('pin-lng').value='';document.getElementById('pin-note').value='';
-    document.getElementById('pin-cat').value='Food';
+    document.getElementById('pin-cat').value='General';
     pickingCoords=true;
     if(leafletMap)document.getElementById('map').style.cursor='crosshair';
   }
@@ -2108,7 +2484,7 @@ function openPinModal(idx){
   if(editingPinIdx!==null){noteSelect.value=appState.pins[editingPinIdx].noteLink||'';}
   modal.style.display='flex';
 }
-function editPin(idx){if(leafletMap)leafletMap.closePopup();openPinModal(idx);}
+function editPin(idx){hideHoverCard();openPinModal(idx);}
 function closePinModal(){document.getElementById('pin-modal').style.display='none';pickingCoords=false;if(leafletMap)document.getElementById('map').style.cursor='';}
 function savePinModal(){
   const name=document.getElementById('pin-name').value.trim();
@@ -2117,7 +2493,7 @@ function savePinModal(){
   const lng=parseFloat(document.getElementById('pin-lng').value);
   const note=document.getElementById('pin-note').value.trim();
   if(!name){flash('Please enter a name');return;}
-  if(isNaN(lat)||isNaN(lng)){flash('Please set coordinates — click on the map or enter them manually');return;}
+  if(isNaN(lat)||isNaN(lng)){flash('Please set coordinates — click on the map or use the search bar');return;}
   if(!appState.pins)appState.pins=[];
   const noteLink=document.getElementById('pin-note-link').value||'';
   if(editingPinIdx!==null){appState.pins[editingPinIdx]={name,cat,lat,lng,note,noteLink};}
@@ -2126,7 +2502,7 @@ function savePinModal(){
 }
 function deletePin(idx){
   if(!confirm('Remove this pin?'))return;
-  if(leafletMap)leafletMap.closePopup();
+  hideHoverCard();
   appState.pins.splice(idx,1);scheduleSave();renderMapMarkers();
 }
 
