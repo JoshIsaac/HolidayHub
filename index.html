@@ -278,9 +278,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .tile-toggle{display:flex;background:var(--sand);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px}
 .tile-btn{font-family:'DM Sans',sans-serif;font-size:.75rem;padding:4px 12px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--ink3);transition:all .12s}
 .tile-btn.active{background:var(--white);color:var(--ink);border:1px solid var(--border)}
-.map-legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s}
-.map-legend-item.active{font-weight:500}
-.map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.map-legend-item{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s;font-size:.95rem;position:relative}
+.map-legend-item.active{border-color:currentColor;background:var(--sand)}
+.map-legend-item:hover::after{content:attr(title);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);font-size:.7rem;padding:3px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:600}
+.map-legend-dot{display:none}
 .leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:0 4px 20px rgba(0,0,0,.12)!important;font-family:'DM Sans',sans-serif!important}
 .leaflet-popup-content{margin:12px 14px!important;font-size:13px!important;line-height:1.5!important}
 .popup-title{font-weight:500;font-size:.9rem;margin-bottom:3px}
@@ -592,7 +593,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
           <button class="btn btn-primary btn-sm" onclick="openPinModal()">+ Add pin</button>
         </div>
       </div>
-      <div id="map"></div>
       <div class="dir-panel">
         <div class="dir-header" onclick="toggleDirPanel()">
           <div class="dir-header-title">🗺 Directions & travel time</div>
@@ -628,13 +628,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
           </div>
           <div id="dir-error" class="dir-error" style="display:none"></div>
           <div id="dir-pin-picker" style="display:none;margin-top:8px">
-            <div style="font-size:.78rem;color:var(--ink3);margin-bottom:6px">Pick a saved pin:</div>
+            <div id="dir-pin-picker-label" style="font-size:.78rem;color:var(--ink3);margin-bottom:6px">Pick a saved pin:</div>
             <div id="dir-pin-list" style="display:flex;flex-wrap:wrap;gap:5px"></div>
           </div>
-        </div>
       </div>
     </div>
-
+      <div id="map"></div>
+    </div>
     <!-- ITINERARY -->
     <div id="panel-itinerary" class="panel active">
       <div class="page-title">Itinerary</div>
@@ -2183,7 +2183,8 @@ function renderMapLegend(){
     const el=document.createElement('div');el.className='map-legend-item'+(activeFilters.has(cat)?' active':'');
     el.style.borderColor=activeFilters.has(cat)?style.color:'var(--border)';
     el.style.color=activeFilters.has(cat)?style.color:'var(--ink3)';
-    el.innerHTML=`<div class="map-legend-dot" style="background:${style.color}"></div>${style.icon} ${cat}`;
+    el.title=cat;
+    el.innerHTML=style.icon;
     el.onclick=()=>{activeFilters.has(cat)?activeFilters.delete(cat):activeFilters.add(cat);renderMapLegend();renderMapMarkers();};
     c.appendChild(el);
   });
@@ -2359,20 +2360,27 @@ let pickingDirTarget=null;
 function pickDirPin(which){
   pickingDirTarget=which;
   const list=document.getElementById('dir-pin-list');
+  const header=document.getElementById('dir-pin-picker-label');
+  if(header)header.textContent=which==='from'?'Pick starting point:':'Pick destination:';
   list.innerHTML='';
   (appState.pins||[]).forEach((p,i)=>{
+    const style=CAT_STYLE[p.cat]||{icon:'📍'};
     const btn=document.createElement('button');
-    btn.className='btn btn-sm';btn.style.fontSize='.75rem';
-    btn.textContent=p.name;
+    btn.className='btn btn-sm';
+    btn.style.cssText='font-size:.75rem;display:flex;align-items:center;gap:5px';
+    btn.innerHTML=`${style.icon} ${p.name}`;
     btn.onclick=()=>{
       document.getElementById(`dir-${which}`).value=p.name;
-      if(which==='from')dirFromCoords=[p.lat,p.lng];
-      else dirToCoords=[p.lat,p.lng];
+      if(which==='from'){dirFromCoords=[p.lat,p.lng];}
+      else{dirToCoords=[p.lat,p.lng];}
       document.getElementById('dir-pin-picker').style.display='none';
+      flash(`${which==='from'?'Start':'Destination'} set to ${p.name}`);
     };
     list.appendChild(btn);
   });
-  document.getElementById('dir-pin-picker').style.display='block';
+  const isVisible=document.getElementById('dir-pin-picker').style.display==='block';
+  document.getElementById('dir-pin-picker').style.display=isVisible&&pickingDirTarget===which?'none':'block';
+  pickingDirTarget=which;
 }
 
 function prefillDirFrom(name,lat,lng){
