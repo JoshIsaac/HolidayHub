@@ -278,10 +278,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .tile-toggle{display:flex;background:var(--sand);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px}
 .tile-btn{font-family:'DM Sans',sans-serif;font-size:.75rem;padding:4px 12px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--ink3);transition:all .12s}
 .tile-btn.active{background:var(--white);color:var(--ink);border:1px solid var(--border)}
-.map-legend-item{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s;font-size:.95rem;position:relative}
-.map-legend-item.active{border-color:currentColor;background:var(--sand)}
-.map-legend-item:hover::after{content:attr(title);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);font-size:.7rem;padding:3px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:600}
-.map-legend-dot{display:none}
+.map-legend-item{display:flex;align-items:center;gap:4px;font-size:.72rem;padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s;white-space:nowrap}
+.map-legend-item.active{font-weight:500}
+.map-legend-item:hover{background:var(--sand)}
+.map-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:0 4px 20px rgba(0,0,0,.12)!important;font-family:'DM Sans',sans-serif!important}
 .leaflet-popup-content{margin:12px 14px!important;font-size:13px!important;line-height:1.5!important}
 .popup-title{font-weight:500;font-size:.9rem;margin-bottom:3px}
@@ -584,7 +584,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
         <div class="map-autocomplete" id="map-autocomplete" style="display:none"></div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;gap:8px;flex-wrap:wrap">
-        <div class="map-legend" id="map-legend" style="margin:0;flex:1"></div>
+        <div class="map-legend" id="map-legend" style="margin:0;flex:1;display:flex;flex-wrap:wrap;gap:5px"></div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
           <div class="tile-toggle">
             <button class="tile-btn active" id="tile-map" onclick="setTileLayer('map')">🗺 Map</button>
@@ -2183,8 +2183,7 @@ function renderMapLegend(){
     const el=document.createElement('div');el.className='map-legend-item'+(activeFilters.has(cat)?' active':'');
     el.style.borderColor=activeFilters.has(cat)?style.color:'var(--border)';
     el.style.color=activeFilters.has(cat)?style.color:'var(--ink3)';
-    el.title=cat;
-    el.innerHTML=style.icon;
+    el.innerHTML=`<div class="map-legend-dot" style="background:${style.color}"></div>${style.icon} ${cat}`;
     el.onclick=()=>{activeFilters.has(cat)?activeFilters.delete(cat):activeFilters.add(cat);renderMapLegend();renderMapMarkers();};
     c.appendChild(el);
   });
