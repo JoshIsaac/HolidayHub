@@ -251,7 +251,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .map-ac-item:hover,.map-ac-item.selected{background:var(--sea-lt)}
 .map-ac-name{font-weight:500;color:var(--ink);margin-bottom:1px}
 .map-ac-sub{font-size:.75rem;color:var(--ink3)}
-.map-hover-card{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;width:200px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:450;pointer-events:none;transition:opacity .15s}
+.map-hover-card{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;width:240px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:450;pointer-events:none;transition:opacity .15s}
 .map-hover-card::after{content:'';position:absolute;bottom:-6px;left:16px;width:10px;height:10px;background:var(--white);border-right:1px solid var(--border);border-bottom:1px solid var(--border);transform:rotate(45deg)}
 .map-hover-title{font-weight:500;font-size:.85rem;color:var(--ink);margin-bottom:3px}
 .map-hover-note{font-size:.75rem;color:var(--ink3);line-height:1.5;margin-top:3px}
@@ -287,8 +287,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .popup-title{font-weight:500;font-size:.9rem;margin-bottom:3px}
 .popup-cat{font-size:.72rem;padding:1px 7px;border-radius:20px;display:inline-block;margin-bottom:5px}
 .popup-note{font-size:.8rem;color:#6b6b6b;margin-bottom:8px}
-.popup-actions{display:flex;gap:6px}
-.popup-btn{font-size:.75rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.popup-actions{display:flex;gap:4px;flex-wrap:wrap}
+.popup-btn{font-size:.7rem;padding:2px 7px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
 .popup-btn:hover{background:var(--sand)}
 .popup-btn-danger{color:var(--coral);border-color:rgba(184,64,64,.2)}
 .popup-btn-danger:hover{background:var(--coral-lt)}
@@ -447,10 +447,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
   .wx-detail-grid{grid-template-columns:1fr 1fr}
   .main{padding:1rem}
   .pack-grid{grid-template-columns:1fr}
-  #map{heig#map{height:340px}
+  #map{height:340px}
   .map-legend-item{font-size:.62rem;padding:2px 5px;gap:2px}
   .map-legend-dot{width:5px;height:5px}
-}ht:340px}
 }
 </style>
 </head>
@@ -614,8 +613,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
               <div class="dir-stat"><div class="dir-stat-val" id="dir-dist">—</div><div class="dir-stat-lbl">Distance</div></div>
               <div class="dir-divider"></div>
               <div class="dir-stat"><div class="dir-stat-val" id="dir-time">—</div><div class="dir-stat-lbl" id="dir-time-lbl">Travel time</div></div>
-              <div class="dir-divider"></div>
-              <div class="dir-stat"><div class="dir-stat-val" id="dir-alt-time">—</div><div class="dir-stat-lbl" id="dir-alt-lbl">Walking</div></div>
             </div>
             <button class="btn btn-sm btn-primary" style="width:100%;margin-top:8px" onclick="showRouteOnMap()">Show route on map ↗</button>
           </div>
@@ -624,8 +621,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
             <div id="dir-pin-picker-label" style="font-size:.78rem;color:var(--ink3);margin-bottom:6px">Pick a saved pin:</div>
             <div id="dir-pin-list" style="display:flex;flex-wrap:wrap;gap:5px"></div>
           </div>
+        </div>
       </div>
-    </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:8px;flex-wrap:wrap">
         <div class="map-legend" id="map-legend" style="margin:0;flex:1;display:flex;flex-wrap:wrap;gap:4px"></div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -1038,7 +1035,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
           <option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel" selected="">travel</option>
         </select>
         <button class="del-btn" onclick="removeEvent(11,2)" aria-label="remove">✕</button></div></div><div class="add-event-form"><input type="text" name="text" placeholder="Add event…"><input type="text" name="time" placeholder="time" style="width:60px"><select name="tag"><option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel">travel</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(11,this)">+ Add</button></div></div></div></div>
-      <button class="btn btn-sm" style="margin-top:4px" onclick="addDay()">+ Add day</button>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm" onclick="addDay()">+ Add day</button>
+        <button class="btn btn-sm btn-primary" onclick="exportIcal()">📅 Export to Calendar</button>
+      </div>
     </div>
 
     <!-- WISHLIST -->
@@ -2161,6 +2161,10 @@ function initMap(){
     flash('Coordinates picked ✓');
   });
   leafletMap.on('click',()=>hideHoverCard());
+  leafletMap.on('contextmenu',e=>{
+    e.originalEvent.preventDefault();
+    showMapContextMenu(e.latlng,e.containerPoint);
+  });
   if(!appState.pins)appState.pins=DEFAULT_PINS.map(p=>({...p}));
   renderMapLegend();renderMapMarkers();
 }
@@ -2204,7 +2208,16 @@ function renderMapMarkers(){
     const m=L.marker([loc.lat,loc.lng],{icon});
     m.on('mouseover',e=>showHoverCard(loc,idx,e));
     m.on('mouseout',()=>{hoverTimeout=setTimeout(hideHoverCard,300);});
-    m.on('click',()=>editPin(idx));
+    m.on('click',()=>{
+      if(dirOpen&&dirFromCoords&&!dirToCoords){
+        dirToCoords=[loc.lat,loc.lng];
+        document.getElementById('dir-to').value=loc.name;
+        flash(`Destination set to ${loc.name}`);
+        hideHoverCard();
+      }else{
+        editPin(idx);
+      }
+    });
     clusterGroup.addLayer(m);
     markers.push(m);
   });
@@ -2225,7 +2238,8 @@ function showHoverCard(loc,idx,e){
     <div class="popup-actions" style="pointer-events:all;margin-top:6px">
       <button class="popup-btn" onclick="editPin(${idx})">✏ Edit</button>
       ${noteBtnHtml}
-      <button class="popup-btn" onclick="prefillDirFrom('${loc.name.replace(/'/g,"\\'")}',${loc.lat},${loc.lng})">🗺 Directions</button>
+      <button class="popup-btn" onclick="prefillDirFrom('${loc.name.replace(/'/g,"\\'")}',${loc.lat},${loc.lng})">🗺 Dirs</button>
+      <button class="popup-btn" onclick="openInGoogleMaps(${loc.lat},${loc.lng},'${loc.name.replace(/'/g,"\\'")}')">📍 Maps</button>
     </div>`;
   card.style.pointerEvents='none';
   card.onmouseenter=()=>clearTimeout(hoverTimeout);
@@ -2238,6 +2252,54 @@ function showHoverCard(loc,idx,e){
   card.style.top=(pt.y-140)+'px';
   mapEl.appendChild(card);
   hoverCard=card;
+}
+let contextMenu=null;
+function showMapContextMenu(latlng,pt){
+  hideMapContextMenu();
+  const menu=document.createElement('div');
+  menu.id='map-context-menu';
+  menu.style.cssText=`position:absolute;left:${pt.x}px;top:${pt.y}px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:600;min-width:160px;overflow:hidden`;
+  const items=[
+    {label:'📍 Set as start (A)',action:()=>{
+      if(!dirOpen)toggleDirPanel();
+      dirFromCoords=[latlng.lat,latlng.lng];
+      document.getElementById('dir-from').value=`${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+      flash('Start point set — now pick a destination');
+    }},
+    {label:'🏁 Set as destination (B)',action:()=>{
+      if(!dirOpen)toggleDirPanel();
+      dirToCoords=[latlng.lat,latlng.lng];
+      document.getElementById('dir-to').value=`${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+      flash('Destination set');
+    }},
+    {label:'📌 Add pin here',action:()=>{
+      openPinModal();
+      setTimeout(()=>{
+        document.getElementById('pin-lat').value=latlng.lat.toFixed(4);
+        document.getElementById('pin-lng').value=latlng.lng.toFixed(4);
+        document.getElementById('pin-pick-hint').style.display='none';
+        pickingCoords=false;
+      },60);
+    }},
+  ];
+  items.forEach(item=>{
+    const btn=document.createElement('button');
+    btn.style.cssText='display:block;width:100%;text-align:left;padding:9px 14px;font-family:DM Sans,sans-serif;font-size:.82rem;background:none;border:none;cursor:pointer;border-bottom:1px solid var(--border);color:var(--ink)';
+    btn.onmouseover=()=>btn.style.background='var(--sea-lt)';
+    btn.onmouseout=()=>btn.style.background='none';
+    btn.textContent=item.label;
+    btn.onclick=()=>{item.action();hideMapContextMenu();};
+    menu.appendChild(btn);
+  });
+  menu.lastChild.style.borderBottom='none';
+  document.getElementById('map').appendChild(menu);
+  contextMenu=menu;
+  setTimeout(()=>document.addEventListener('click',hideMapContextMenu,{once:true}),10);
+}
+function hideMapContextMenu(){
+  const m=document.getElementById('map-context-menu');
+  if(m)m.remove();
+  contextMenu=null;
 }
 
 function hideHoverCard(){
@@ -2328,6 +2390,11 @@ function setDirMode(mode){
   dirMode=mode;
   document.getElementById('dir-mode-car').classList.toggle('active',mode==='car');
   document.getElementById('dir-mode-walk').classList.toggle('active',mode==='walk');
+  if(dirFromCoords&&dirToCoords){
+    getDirections().then(()=>{
+      if(routeLayer)showRouteOnMap();
+    });
+  }
 }
 
 function onDirSearch(which,val){
@@ -2412,26 +2479,23 @@ async function getDirections(){
     dirToCoords=[parseFloat(toData.lat),parseFloat(toData.lon)];
   }
   try{
-    const [carData,walkData]=await Promise.all([
-      fetchRoute(dirFromCoords,dirToCoords,'car'),
-      fetchRoute(dirFromCoords,dirToCoords,'foot')
-    ]);
-    if(!carData&&!walkData){errEl.textContent='Could not calculate route. Try different locations.';errEl.style.display='block';return;}
-    const primary=carData||walkData;
+    const profile=dirMode==='car'?'car':'foot';
+    const routeData=await fetchRoute(dirFromCoords,dirToCoords,profile);
+    const carData=dirMode==='car'?routeData:null;
+    const walkData=dirMode==='car'?null:routeData;
+    if(!routeData){errEl.textContent='Could not calculate route. Check the browser console (F12) for details, or try different locations.';errEl.style.display='block';return;}
+    const primary=routeData;
     const distKm=(primary.distance/1000).toFixed(1);
     const carMins=carData?Math.round(carData.duration/60):null;
     const walkMins=walkData?Math.round(walkData.duration/60):null;
     document.getElementById('dir-dist').textContent=distKm+' km';
-    if(dirMode==='car'&&carData){
-      document.getElementById('dir-time').textContent=carMins>=60?`${Math.floor(carMins/60)}h ${carMins%60}m`:carMins+'m';
+    const fmtMins=m=>m>=60?`${Math.floor(m/60)}h ${m%60}m`:m+'m';
+    if(dirMode==='car'){
+      document.getElementById('dir-time').textContent=carMins?fmtMins(carMins):'—';
       document.getElementById('dir-time-lbl').textContent='Drive time';
-      document.getElementById('dir-alt-time').textContent=walkMins?walkMins>=60?`${Math.floor(walkMins/60)}h ${walkMins%60}m`:walkMins+'m':'—';
-      document.getElementById('dir-alt-lbl').textContent='Walking';
     }else{
-      document.getElementById('dir-time').textContent=walkMins>=60?`${Math.floor(walkMins/60)}h ${walkMins%60}m`:walkMins+'m';
+      document.getElementById('dir-time').textContent=walkMins?fmtMins(walkMins):'—';
       document.getElementById('dir-time-lbl').textContent='Walk time';
-      document.getElementById('dir-alt-time').textContent=carMins?carMins+'m':'—';
-      document.getElementById('dir-alt-lbl').textContent='Driving';
     }
     window._lastRouteGeom=primary.geometry;
     resEl.style.display='block';
@@ -2449,13 +2513,24 @@ async function geocodeOnce(query){
 
 async function fetchRoute(from,to,profile){
   try{
-    const osrmProfile=profile==='car'?'driving':profile;
-    const url=`https://router.project-osrm.org/route/v1/${osrmProfile}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
-    const res=await fetch(url);
-    const data=await res.json();
-    if(data.code!=='Ok'||!data.routes.length)return null;
-    return{distance:data.routes[0].distance,duration:data.routes[0].duration,geometry:data.routes[0].geometry};
-  }catch(e){return null;}
+    let url;
+    if(profile==='foot'){
+      // OSRM foot routing via the pedestrian-specific endpoint
+      url=`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+      const res=await fetch(url);
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      if(data.code!=='Ok'||!data.routes.length)return null;
+      return{distance:data.routes[0].distance,duration:data.routes[0].duration,geometry:data.routes[0].geometry};
+    }else{
+      url=`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+      const res=await fetch(url);
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      if(data.code!=='Ok'||!data.routes.length)return null;
+      return{distance:data.routes[0].distance,duration:data.routes[0].duration,geometry:data.routes[0].geometry};
+    }
+  }catch(e){console.error('fetchRoute error:',e);return null;}
 }
 
 function showRouteOnMap(){
@@ -3099,6 +3174,66 @@ function renderTaskBoard(){
     col.appendChild(addBtn);
     c.appendChild(col);
   });
+}
+
+function exportIcal(){
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Corfu 2026 Planner//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  function parseDate(str){
+    const s=str.toLowerCase();
+    const m1=s.match(/(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/);
+    const m2=s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})/);
+    let day=null,month=null;
+    if(m1){day=parseInt(m1[1]);month=months[m1[2]];}
+    else if(m2){day=parseInt(m2[2]);month=months[m2[1]];}
+    if(day&&month!==null)return new Date(2026,month,day);
+    return null;
+  }
+  function icalDate(d,timeStr){
+    const pad=n=>String(n).padStart(2,'0');
+    const t=timeStr?timeStr.toLowerCase():'';
+    let h=9,m=0;
+    const hm=t.match(/^(\d{1,2}):?(\d{2})?/);
+    if(hm){h=parseInt(hm[1]);m=parseInt(hm[2]||0);}
+    else if(t.includes('10:25'))  {h=10;m=25;}
+    else if(t.includes('16:30'))  {h=16;m=30;}
+    else if(t==='am'||t==='morning'){h=9;}
+    else if(t==='noon'||t==='midday'){h=12;}
+    else if(t==='pm'||t==='afternoon'){h=14;}
+    else if(t==='eve'||t==='evening'){h=18;}
+    else if(t==='night'){h=20;}
+    else if(t.match(/^\d+am/)){h=parseInt(t);}
+    else if(t.match(/^\d+pm/)){h=parseInt(t)+12;}
+    const ds=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+    const ts=`${pad(h)}${pad(m)}00`;
+    return`${ds}T${ts}00`;
+  }
+  function icalEnd(d,timeStr){
+    const start=icalDate(d,timeStr);
+    const h=parseInt(start.slice(9,11));
+    const newH=String(h+1).padStart(2,'0');
+    return start.slice(0,9)+newH+start.slice(11);
+  }
+  function sanitize(s){return(s||'').replace(/[\\,;]/g,c=>'\\'+c).replace(/\n/g,'\\n');}
+  (appState.days||[]).forEach(day=>{
+    const date=parseDate(day.date);
+    if(!date)return;
+    (day.events||[]).forEach((ev,i)=>{
+      const uid=`corfu2026-day${day.id}-ev${i}@planner`;
+      const dtstart=icalDate(date,ev.time);
+      const dtend=icalEnd(date,ev.time);
+      const summary=sanitize(ev.text+(day.label?` (${day.label})`:''));
+      lines.push('BEGIN:VEVENT',`UID:${uid}`,`DTSTART;TZID=Europe/Athens:${dtstart}`,`DTEND;TZID=Europe/Athens:${dtend}`,`SUMMARY:${summary}`,`CATEGORIES:${ev.tag}`,`DESCRIPTION:Corfu 2026 · ${sanitize(day.date)} · ${ev.tag}`,'END:VEVENT');
+    });
+  });
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='corfu-2026.ics';a.click();
+  flash('Calendar exported ✓');
+}
+function openInGoogleMaps(lat,lng,name){
+  const url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(name)+'&center='+lat+','+lng;
+  window.open(url,'_blank');
 }
 
 /* ══ UTILS ══ */
