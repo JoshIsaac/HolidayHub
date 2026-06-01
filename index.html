@@ -450,7 +450,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
   #map{height:340px}
   .map-legend-item{font-size:.62rem;padding:2px 5px;gap:2px}
   .map-legend-dot{width:5px;height:5px}
+  .sidebar-brand{display:none}
 }
+.sidebar-brand{padding:1rem 1.5rem .875rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-brand-logo{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--white)}
+.sidebar-brand-logo span{color:var(--sea2)}
+.sidebar-brand-sub{font-size:.72rem;color:rgba(255,255,255,.3);margin-top:2px}
+.sidebar-brand-avatars{display:flex;align-items:center;gap:5px;margin-top:.6rem}
+.sidebar-brand-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:var(--white);border:1.5px solid rgba(255,255,255,.12);flex-shrink:0}
+.sidebar-brand-av-p1{background:var(--sea)}
+.sidebar-brand-av-p2{background:var(--teal)}
+.sidebar-brand-av-label{font-size:.68rem;color:rgba(255,255,255,.28);margin-left:2px}
+.nav-item.active .nav-icon{background:rgba(38,125,168,.18);border-radius:6px;padding:2px 3px;margin:-2px -3px}
+.dash-hero{background:var(--sea);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.dash-hero-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.875rem}
+.dash-hero-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:500;color:var(--white);line-height:1.1}
+.dash-hero-sub{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:.2rem}
+.dash-hero-countdown{text-align:right;flex-shrink:0;padding-left:1rem}
+.dash-hero-num{font-family:'Playfair Display',serif;font-size:2.75rem;font-weight:700;color:var(--white);line-height:1}
+.dash-hero-num-lbl{font-size:.68rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.dash-hero-pills{display:flex;gap:6px;flex-wrap:wrap}
+.dash-hero-pill{background:rgba(255,255,255,.12);color:rgba(255,255,255,.88);font-size:.75rem;padding:3px 10px;border-radius:20px;font-weight:500}
+.day-row.day-type-dive{border-left-color:#1A7A6A;border-left-width:3px}
+.day-row.day-type-sail{border-left-color:#1B5E7B;border-left-width:3px}
+.day-row.day-type-kite{border-left-color:#C4762A;border-left-width:3px}
+.day-row.day-type-hike{border-left-color:#2D6B1A;border-left-width:3px}
+.day-row.day-type-history{border-left-color:#4A35A0;border-left-width:3px}
+.day-row.day-type-travel{border-left-color:#B84040;border-left-width:3px}
+.day-row.day-type-free{border-left-color:var(--sand2);border-left-width:3px}
+.day-row.day-type-explore{border-left-color:#267DA8;border-left-width:3px}
 </style>
 </head>
 <body>
@@ -525,6 +553,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 </header>
 <div class="layout">
   <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-logo">Corfu <span>2026</span></div>
+      <div class="sidebar-brand-sub">7 – 18 August</div>
+      <div class="sidebar-brand-avatars">
+        <div class="sidebar-brand-av sidebar-brand-av-p1">J</div>
+        <div class="sidebar-brand-av sidebar-brand-av-p2">A</div>
+        <span class="sidebar-brand-av-label">Planning together</span>
+      </div>
+    </div>
     <div class="nav-section">Overview</div>
     <a class="nav-item" onclick="showPanel(&#39;dashboard&#39;,this)"><span class="nav-icon">🌤</span> Dashboard</a>
     <a class="nav-item" onclick="showPanel(&#39;map&#39;,this)"><span class="nav-icon">🗺</span> Map</a>
@@ -550,8 +587,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 
       <!-- DASHBOARD -->
     <div id="panel-dashboard" class="panel">
-      <div class="page-title">Dashboard</div>
-      <p class="page-subtitle">Live weather forecast + calendar</p>
+      <div class="dash-hero">
+        <div class="dash-hero-row">
+          <div>
+            <div class="dash-hero-title">Corfu 2026</div>
+            <div class="dash-hero-sub">7 – 18 August · Greece</div>
+          </div>
+          <div class="dash-hero-countdown">
+            <div class="dash-hero-num" id="dash-hero-num">—</div>
+            <div class="dash-hero-num-lbl">days to go</div>
+          </div>
+        </div>
+        <div class="dash-hero-pills" id="dash-hero-pills"></div>
+      </div>
       <div class="card-title" style="margin-bottom:.5rem">🌤 Weather — Corfu, August</div>
       <div id="wx-container"><div style="text-align:center;padding:2rem;color:var(--ink3)">Loading forecast…</div></div>
       <div style="margin-top:1.5rem">
@@ -1818,7 +1866,7 @@ function showPanel(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   if(el)el.classList.add('active');
-  if(id==='dashboard'){if(!wxData)fetchWeather();calYear=TRIP_YEAR;calMonth=7;renderCalendar();}
+  if(id==='dashboard'){if(!wxData)fetchWeather();calYear=TRIP_YEAR;calMonth=7;renderCalendar();renderDashboardHero();}
   if(id==='map'){setTimeout(()=>{if(!leafletMap)initMap();else leafletMap.invalidateSize();},100);}
   if(id==='notes'){if(!appState.notes)appState.notes=[];renderNotesList();}
 }
@@ -1852,7 +1900,9 @@ function renderItinerary(){
     const hasActivity=day.events.some(e=>['dive','sail','kite','hike','history'].includes(e.tag));
     if(hasActivity)activeDays++;else freeDays++;
     totalEvents+=day.events.length;
-    const wrap=document.createElement('div');wrap.className='day-row draggable';
+    const actOrder=['dive','sail','kite','hike','history','travel','explore','general','free'];
+    const topTag=actOrder.find(t=>day.events.some(e=>e.tag===t))||'free';
+    const wrap=document.createElement('div');wrap.className=`day-row draggable day-type-${topTag}`;
     wrap.draggable=true;
     wrap.addEventListener('dragstart',e=>onDragStart(e,'days',di));
     wrap.addEventListener('dragover',e=>onDragOver(e,wrap));
@@ -3236,6 +3286,25 @@ function openInGoogleMaps(lat,lng,name){
   window.open(url,'_blank');
 }
 
+function renderDashboardHero(){
+  const numEl=document.getElementById('dash-hero-num');
+  if(numEl){
+    const diff=Math.ceil((new Date('2026-08-07')-new Date())/(864e5));
+    numEl.textContent=diff>0?diff:diff===0?'Today!':'Underway';
+  }
+  const pills=document.getElementById('dash-hero-pills');
+  if(!pills)return;
+  const counts={};
+  (appState.days||[]).forEach(d=>d.events.forEach(ev=>{
+    if(['dive','sail','kite','hike','history'].includes(ev.tag))counts[ev.tag]=(counts[ev.tag]||0)+1;
+  }));
+  const icons={dive:'🤿',sail:'⛵',kite:'🪁',hike:'🥾',history:'🏛'};
+  pills.innerHTML='';
+  Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([tag,n])=>{
+    const d=document.createElement('div');d.className='dash-hero-pill';
+    d.textContent=`${icons[tag]} ${n} ${tag}`;pills.appendChild(d);
+  });
+}
 /* ══ UTILS ══ */
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
