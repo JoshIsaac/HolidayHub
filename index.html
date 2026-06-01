@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Corfu 2026 — Holiday Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
   --radius:10px;--radius-lg:16px;
 }
 html{font-size:15px}
-body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;line-height:1.6}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;min-height:100dvh;line-height:1.6}
 
 /* ── AUTH SCREEN ── */
 #auth-screen{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem}
@@ -68,7 +68,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .nav-item.active{color:var(--white);border-left-color:var(--sea2);background:rgba(255,255,255,.07);font-weight:500}
 .nav-icon{font-size:1rem;width:20px;text-align:center}
 .nav-section{font-size:.7rem;color:rgba(255,255,255,.3);padding:1rem 1.5rem .25rem;letter-spacing:.08em;text-transform:uppercase}
-.user-toggle{display:none}
 .main{padding:2rem;overflow-y:auto}
 .panel{display:none}.panel.active{display:block}
 .page-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:500;margin-bottom:.25rem}
@@ -435,22 +434,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
   .notes-sidebar{height:200px}
 }
 
+.bottom-tabs,.more-sheet,.more-sheet-backdrop{display:none}
+.btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 6px;color:var(--ink3);text-decoration:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:500;border:none;background:none}
+.btab.active{color:var(--sea)}
+.btab-icon{font-size:1.25rem;line-height:1;display:block}
+.btab.active .btab-icon{background:var(--sea-lt);border-radius:7px;padding:2px 4px}
+.more-sheet-handle{width:36px;height:4px;background:var(--sand2);border-radius:2px;margin:0 auto 10px}
+.more-item{display:flex;align-items:center;gap:14px;padding:13px 20px;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--ink);text-decoration:none;cursor:pointer;border-bottom:1px solid var(--border)}
+.more-item:last-child{border-bottom:none}
+.more-item:hover{background:var(--sand)}
+.more-item-icon{font-size:1.2rem;width:24px;text-align:center;flex-shrink:0}
 @media(max-width:680px){
   .layout{grid-template-columns:1fr}
-  .sidebar{flex-direction:row;flex-wrap:wrap;padding:.5rem;overflow-x:auto}
+  .sidebar{display:none}
   .nav-section{display:none}
   .nav-item{padding:8px 10px;border-left:none;border-bottom:2px solid transparent;font-size:.8rem}
   .nav-item.active{border-left:none;border-bottom-color:var(--sea2)}
-  .user-toggle{display:none}
   .stats-grid{grid-template-columns:1fr 1fr}
   .wx-top{grid-template-columns:1fr 1fr}.wx-hero{grid-column:span 2}
   .wx-detail-grid{grid-template-columns:1fr 1fr}
-  .main{padding:1rem}
+    .main{padding:1rem;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   .pack-grid{grid-template-columns:1fr}
   #map{height:340px}
   .map-legend-item{font-size:.62rem;padding:2px 5px;gap:2px}
   .map-legend-dot{width:5px;height:5px}
   .sidebar-brand{display:none}
+  input,select,textarea{font-size:16px!important}
+  .bottom-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:0.5px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:150}
+  .more-sheet-backdrop.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200}
+  .more-sheet.open{display:block;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:8px 0 calc(16px + env(safe-area-inset-bottom));z-index:201}
 }
 .sidebar-brand{padding:1rem 1.5rem .875rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .sidebar-brand-logo{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--white)}
@@ -1553,6 +1565,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 
 <div id="status-bar" class="status-bar"></div>
 
+<nav class="bottom-tabs" id="bottom-tabs">
+  <a class="btab" data-panel="dashboard" onclick="showPanel('dashboard',this)">
+    <span class="btab-icon">🌤</span><span>Home</span>
+  </a>
+  <a class="btab" data-panel="map" onclick="showPanel('map',this)">
+    <span class="btab-icon">🗺</span><span>Map</span>
+  </a>
+  <a class="btab active" data-panel="itinerary" onclick="showPanel('itinerary',this)">
+    <span class="btab-icon">📅</span><span>Plan</span>
+  </a>
+  <a class="btab" data-panel="tasks" onclick="showPanel('tasks',this)">
+    <span class="btab-icon">✅</span><span>Tasks</span>
+  </a>
+  <a class="btab" id="btab-more" onclick="toggleMoreSheet()">
+    <span class="btab-icon" style="font-size:.85rem;letter-spacing:3px;padding:3px 0">•••</span>
+    <span>More</span>
+  </a>
+</nav>
+<div class="more-sheet-backdrop" id="more-sheet-backdrop" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="more-sheet">
+  <div class="more-sheet-handle"></div>
+  <a class="more-item" onclick="showPanel('wishlist',null);closeMoreSheet()">
+    <span class="more-item-icon">⭐</span>Wishlist
+  </a>
+  <a class="more-item" onclick="showPanel('notes',null);closeMoreSheet()">
+    <span class="more-item-icon">📝</span>Notes
+  </a>
+  <a class="more-item" onclick="showPanel('budget',null);closeMoreSheet()">
+    <span class="more-item-icon">💷</span>Budget
+  </a>
+  <a class="more-item" onclick="showPanel('packing',null);closeMoreSheet()">
+    <span class="more-item-icon">🎒</span>Packing
+  </a>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" onerror="loadSupabaseFallback()"></script>
@@ -1723,8 +1770,6 @@ async function signOut(){
   currentSession=null;
   document.getElementById('auth-screen').style.display='flex';
   showLoginView();
-  document.getElementById('auth-email').value='';
-  document.getElementById('auth-password').value='';
 }
 function resolveUser(email){
   if(!email)return'p1';
@@ -1840,8 +1885,8 @@ async function loadFromDB(){
 }
 function scheduleSave(){
   clearTimeout(saveTimer);
-  // Immediately refresh calendar if it's visible
-  if(document.getElementById('panel-dashboard').classList.contains('active'))renderCalendar();
+  if(document.getElementById('panel-dashboard').classList.contains('active')){renderCalendar();renderDashboardHero();}
+  if(document.getElementById('panel-tasks').classList.contains('active'))renderTasks();
   saveTimer=setTimeout(async()=>{
     saveLocal();if(!sb||!currentSession)return;
     try{await sb.from('planner_state').upsert({trip_id:'corfu2026',state:appState});flash('Saved ✓');}
@@ -1864,11 +1909,18 @@ function defaultState(){
 function showPanel(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   if(el)el.classList.add('active');
+  const matchBtab=document.querySelector(`.btab[data-panel="${id}"]`);
+  if(matchBtab)matchBtab.classList.add('active');
+  if(['wishlist','notes','budget','packing'].includes(id)){
+    document.getElementById('btab-more')?.classList.add('active');
+  }
   if(id==='dashboard'){if(!wxData)fetchWeather();calYear=TRIP_YEAR;calMonth=7;renderCalendar();renderDashboardHero();}
   if(id==='map'){setTimeout(()=>{if(!leafletMap)initMap();else leafletMap.invalidateSize();},100);}
   if(id==='notes'){if(!appState.notes)appState.notes=[];renderNotesList();}
+  if(id==='tasks')renderTasks();
 }
 function setUser(u){currentUser=u;renderWishlist();renderPacking();}
 function setConn(type,text){const el=document.getElementById('conn-badge');el.className='conn-badge conn-'+type;el.innerHTML=`<div class="conn-dot"></div><span>${text}</span>`;}
@@ -3286,6 +3338,22 @@ function openInGoogleMaps(lat,lng,name){
   window.open(url,'_blank');
 }
 
+function toggleMoreSheet(){
+  const sheet=document.getElementById('more-sheet');
+  const bd=document.getElementById('more-sheet-backdrop');
+  const btn=document.getElementById('btab-more');
+  if(!sheet||!bd)return;
+  const open=sheet.classList.toggle('open');
+  bd.classList.toggle('open',open);
+  if(btn)btn.classList.toggle('active',open);
+}
+function closeMoreSheet(){
+  document.getElementById('more-sheet')?.classList.remove('open');
+  document.getElementById('more-sheet-backdrop')?.classList.remove('open');
+  const moreActive=['wishlist','notes','budget','packing'].some(
+    id=>document.getElementById('panel-'+id)?.classList.contains('active'));
+  if(!moreActive)document.getElementById('btab-more')?.classList.remove('active');
+}
 function renderDashboardHero(){
   const numEl=document.getElementById('dash-hero-num');
   if(numEl){
