@@ -12,7 +12,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --sand:#F5EFE0;--sand2:#EDE4CC;--ink:#1A1A1A;--ink2:#4A4540;--ink3:#8A8178;
+  --sand:#F3EDE0;--sand2:#EDE4CC;--ink:#1A1A1A;--ink2:#4A4540;--ink3:#8A8178;
   --sea:#1B5E7B;--sea2:#267DA8;--sea-lt:#D6ECF5;
   --teal:#1A7A6A;--teal-lt:#D4F0E8;
   --amber:#C4762A;--amber-lt:#FAECD6;
@@ -67,17 +67,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .nav-item:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.05)}
 .nav-item.active{color:var(--white);border-left-color:var(--sea2);background:rgba(255,255,255,.07);font-weight:500}
 .nav-icon{font-size:1rem;width:20px;text-align:center}
-.nav-section{font-size:.7rem;color:rgba(255,255,255,.3);padding:1rem 1.5rem .25rem;letter-spacing:.08em;text-transform:uppercase}
+.nav-section{font-size:.62rem;color:rgba(255,255,255,.22);padding:1rem 1.5rem .25rem;letter-spacing:.1em;text-transform:uppercase}
 .main{padding:2rem;overflow-y:auto}
 .panel{display:none}.panel.active{display:block}
-.page-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:500;margin-bottom:.25rem}
+.page-title{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:500;letter-spacing:-.01em;margin-bottom:.25rem}
 .page-subtitle{font-size:.85rem;color:var(--ink3);margin-bottom:1.5rem}
-.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
-.card-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:.75rem}
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.05),0 0 0 0.5px rgba(26,26,26,.04)}
+.card-title{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:.75rem}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
-.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem}
+.stat-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.04),0 0 0 0.5px rgba(26,26,26,.04)}
 .stat-label{font-size:.75rem;color:var(--ink3);margin-bottom:4px}
-.stat-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--ink)}
+.stat-value{font-family:'Playfair Display',serif;font-size:1.85rem;font-weight:700;color:var(--ink)}
 
 /* ── BUTTONS ── */
 .btn{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
@@ -108,7 +108,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .drag-handle:hover{opacity:.8}
 
 /* ── ITINERARY ── */
-.day-row{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:visible}
+.day-row{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:visible;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 1rem;cursor:pointer;transition:background .12s;gap:8px}
 .day-header:hover{background:var(--sand)}
 .day-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
@@ -328,6 +328,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .chip-history{background:#EDE8FC;color:#4A35A0}
 .chip-free{background:var(--sand2);color:var(--ink2)}
 .chip-travel{background:var(--coral-lt);color:var(--coral)}
+.chip-explore{background:var(--sea-lt);color:var(--sea2)}
 .cal-more{font-size:.68rem;color:var(--ink3);padding:1px 4px;cursor:pointer}
 .cal-more:hover{color:var(--sea)}
 .cal-day-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
@@ -508,16 +509,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 <div id="auth-screen" style="display:flex;">
   <div class="auth-card">
 
-    <!-- One-tap login (default view) -->
     <div id="auth-login-view">
       <div class="auth-logo">Corfu <span>2026</span></div>
-      <div class="auth-sub">Who's planning?</div>
-      <button class="auth-btn auth-btn-p1" onclick="quickSignIn('p1')" style="margin-bottom:.75rem">
-        👤 Sign in as Joshua
-      </button>
-      <button class="auth-btn auth-btn-p2" onclick="quickSignIn('p2')">
-        👤 Sign in as Allie
-      </button>
+      <div class="auth-sub" id="auth-who-sub">Who's planning?</div>
+      <div id="auth-person-picker">
+        <button class="auth-btn auth-btn-p1" onclick="showSignInForm('p1')" style="margin-bottom:.75rem">👤 Sign in as Joshua</button>
+        <button class="auth-btn auth-btn-p2" onclick="showSignInForm('p2')">👤 Sign in as Allie</button>
+      </div>
+      <form id="auth-password-form" style="display:none" onsubmit="submitSignIn();return false">
+        <input type="email" id="auth-form-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="auth-form-password" autocomplete="current-password" placeholder="Your password">
+        </div>
+        <button type="submit" class="auth-btn" id="auth-form-btn">Sign in</button>
+        <div style="text-align:center;margin-top:.75rem">
+          <button type="button" class="auth-resend" onclick="backToPicker()">← Change person</button>
+          &nbsp;·&nbsp;
+          <button type="button" class="auth-resend" onclick="showMagicLinkView()">Magic link</button>
+        </div>
+      </form>
       <div class="auth-msg" id="auth-msg"></div>
     </div>
 
@@ -547,14 +558,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
     <!-- Set password view (after first magic link sign-in) -->
     <div id="auth-set-password-view" style="display:none">
       <div class="auth-logo">Corfu <span>2026</span></div>
-      <div class="auth-sub">Set a password for future logins</div>
+      <div class="auth-sub" id="auth-set-pwd-sub">Set a password for future logins</div>
+      <input type="email" id="auth-set-pwd-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
       <div class="auth-field">
         <label>New password</label>
-        <input type="password" id="auth-new-password" placeholder="Choose a password" onkeydown="if(event.key==='Enter')document.getElementById('auth-confirm-password').focus()">
+        <input type="password" id="auth-new-password" autocomplete="new-password" placeholder="Choose a password" onkeydown="if(event.key==='Enter')document.getElementById('auth-confirm-password').focus()">
       </div>
       <div class="auth-field">
         <label>Confirm password</label>
-        <input type="password" id="auth-confirm-password" placeholder="Repeat your password" onkeydown="if(event.key==='Enter')setPassword()">
+        <input type="password" id="auth-confirm-password" autocomplete="new-password" placeholder="Repeat your password" onkeydown="if(event.key==='Enter')setPassword()">
       </div>
       <button class="auth-btn" id="auth-set-pwd-btn" onclick="setPassword()">Set password & continue</button>
       <div class="auth-msg" id="auth-set-pwd-msg"></div>
@@ -589,8 +601,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
     <a class="nav-item" onclick="showPanel(&#39;map&#39;,this)"><span class="nav-icon">🗺</span> Map</a>
     <div class="nav-section">Plan</div>
     <a class="nav-item active" onclick="showPanel(&#39;itinerary&#39;,this)"><span class="nav-icon">📅</span> Itinerary</a>
-    <a class="nav-item" onclick="showPanel(&#39;wishlist&#39;,this)"><span class="nav-icon">⭐</span> Wishlist</a>
-    <a class="nav-item" onclick="showPanel(&#39;notes&#39;,this)"><span class="nav-icon">📝</span> Notes</a>     <a class="nav-item" onclick="showPanel(&#39;tasks&#39;,this)"><span class="nav-icon">✅</span> Tasks</a>
+    <a class="nav-item" onclick="showPanel(&#39;notes&#39;,this)"><span class="nav-icon">📝</span> Notes</a>
+    <a class="nav-item" onclick="showPanel(&#39;wishlist&#39;,this)"><span class="nav-icon">⭐</span> Wishlist</a>     <a class="nav-item" onclick="showPanel(&#39;tasks&#39;,this)"><span class="nav-icon">✅</span> Tasks</a>
     <div class="nav-section">Finance</div>
     <a class="nav-item" onclick="showPanel(&#39;budget&#39;,this)"><span class="nav-icon">💷</span> Budget</a>
     <div class="nav-section">Prep</div>
@@ -1190,6 +1202,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
         <div class="stat-card"><div class="stat-label">% used</div><div class="stat-value" id="b-pct">0%</div></div>
       </div>
       <div class="budget-bar-wrap"><div class="budget-bar-fill" id="b-bar" style="width:0%"></div></div>
+      <div class="card" id="card-currency">
+  <div class="card-title">💱 Currency converter</div>
+  <div id="conv-rate-lbl" style="font-size:.75rem;color:var(--ink3);margin-bottom:.875rem;display:flex;align-items:center;gap:6px">
+    <span id="conv-rate-dot" style="width:6px;height:6px;border-radius:50%;background:var(--ink3);flex-shrink:0;display:inline-block"></span>
+    Loading rate…
+  </div>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end">
+    <div>
+      <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:5px">Pounds £</div>
+      <input type="number" id="conv-gbp" placeholder="0.00" min="0" step="0.01"
+        style="width:100%;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;padding:10px 12px;border:0.5px solid var(--border);border-radius:9px;background:var(--sand);color:var(--ink);outline:none;box-shadow:0 1px 3px rgba(0,0,0,.04)"
+        oninput="convertCurrency('gbp')"
+        onfocus="this.style.borderColor='var(--sea2)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="padding-bottom:10px;font-size:1.1rem;color:var(--ink3);text-align:center;user-select:none">⇄</div>
+    <div>
+      <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--teal);margin-bottom:5px">Euros €</div>
+      <input type="number" id="conv-eur" placeholder="0.00" min="0" step="0.01"
+        style="width:100%;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;padding:10px 12px;border:0.5px solid var(--teal);border-radius:9px;background:var(--teal-lt);color:var(--teal);outline:none;box-shadow:0 1px 3px rgba(0,0,0,.04)"
+        oninput="convertCurrency('eur')"
+        onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--teal)'">
+    </div>
+  </div>
+  <button class="btn btn-sm" style="margin-top:10px" onclick="fetchExchangeRate()">↻ Refresh rate</button>
+</div>
       <div class="card">
         <div class="card-title">Set budget</div>
         <div class="budget-input-row">
@@ -1596,11 +1633,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 <div class="more-sheet-backdrop" id="more-sheet-backdrop" onclick="closeMoreSheet()"></div>
 <div class="more-sheet" id="more-sheet">
   <div class="more-sheet-handle"></div>
-  <a class="more-item" onclick="showPanel('wishlist',null);closeMoreSheet()">
-    <span class="more-item-icon">⭐</span>Wishlist
-  </a>
   <a class="more-item" onclick="showPanel('notes',null);closeMoreSheet()">
     <span class="more-item-icon">📝</span>Notes
+  </a>
+  <a class="more-item" onclick="showPanel('wishlist',null);closeMoreSheet()">
+    <span class="more-item-icon">⭐</span>Wishlist
   </a>
   <a class="more-item" onclick="showPanel('budget',null);closeMoreSheet()">
     <span class="more-item-icon">💷</span>Budget
@@ -1688,6 +1725,19 @@ let currentSession=null;
 
 /* ══ AUTH ══ */
 
+function showSetPasswordView(session,isReset=false){
+  if(session){currentSession=session;currentUser=resolveUser(session.user?.email);updateSidebarUser(session);}
+  const email=session?.user?.email||'';
+  const el=document.getElementById('auth-set-pwd-email');if(el)el.value=email;
+  document.getElementById('auth-set-pwd-sub').textContent=isReset?'Choose a new password for your account':'Set a password for future logins';
+  const skipBtn=document.querySelector('#auth-set-password-view [onclick="skipSetPassword()"]');
+  if(skipBtn)skipBtn.style.display=isReset?'none':'';
+  ['auth-login-view','auth-magic-view','auth-sent-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('auth-set-password-view').style.display='block';
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('auth-new-password').value='';
+  document.getElementById('auth-confirm-password').value='';
+}
 function showLoginView(){
   document.getElementById('auth-login-view').style.display='block';
   document.getElementById('auth-magic-view').style.display='none';
@@ -1705,25 +1755,46 @@ function showMagicLinkView(){
   document.getElementById('auth-magic-msg').className='auth-msg';
 }
 
-async function quickSignIn(who){
-  const msg=document.getElementById('auth-msg');
-  msg.className='auth-msg';
-  if(!sb){msg.className='auth-msg error';msg.textContent='Still connecting — please wait a moment and try again.';return;}
+let _signingInAs=null;
+function showSignInForm(who){
+  _signingInAs=who;
   const email=who==='p1'?P1_EMAIL:P2_EMAIL;
   const name=who==='p1'?'Joshua':'Allie';
-  const password=prompt(`Enter ${name}'s password:`);
-  if(!password)return;
-  const btn=document.querySelector(`.auth-btn-${who}`);
+  document.getElementById('auth-person-picker').style.display='none';
+  document.getElementById('auth-who-sub').textContent=`Welcome back, ${name}`;
+  document.getElementById('auth-form-email').value=email;
+  document.getElementById('auth-form-password').value='';
+  const btn=document.getElementById('auth-form-btn');
+  btn.style.cssText=who==='p1'?'background:var(--sea);border-color:var(--sea)':'background:var(--teal);border-color:var(--teal)';
+  btn.disabled=false;btn.textContent='Sign in';
+  document.getElementById('auth-password-form').style.display='block';
+  document.getElementById('auth-msg').className='auth-msg';
+  setTimeout(()=>document.getElementById('auth-form-password')?.focus(),80);
+}
+function backToPicker(){
+  _signingInAs=null;
+  document.getElementById('auth-person-picker').style.display='block';
+  document.getElementById('auth-password-form').style.display='none';
+  document.getElementById('auth-who-sub').textContent="Who's planning?";
+  document.getElementById('auth-msg').className='auth-msg';
+}
+async function submitSignIn(){
+  if(!_signingInAs)return;
+  const email=_signingInAs==='p1'?P1_EMAIL:P2_EMAIL;
+  const password=document.getElementById('auth-form-password').value;
+  const msg=document.getElementById('auth-msg');
+  msg.className='auth-msg';
+  if(!password){msg.className='auth-msg error';msg.textContent='Please enter your password.';return;}
+  if(!sb){msg.className='auth-msg error';msg.textContent='Still connecting — please wait a moment.';return;}
+  const btn=document.getElementById('auth-form-btn');
   btn.disabled=true;btn.textContent='Signing in…';
   try{
-    const{data,error}=await sb.auth.signInWithPassword({email,password});
+    const{error}=await sb.auth.signInWithPassword({email,password});
     if(error)throw error;
   }catch(e){
-    console.error('Quick sign in error:',e);
     msg.className='auth-msg error';
-    msg.textContent=e?.message?.includes('Invalid')?'Incorrect password — try again.':e?.message||'Sign in failed.';
-    msg.innerHTML+=` <button class="auth-resend" onclick="showMagicLinkView()">Try magic link instead</button>`;
-    btn.disabled=false;btn.textContent=`👤 Sign in as ${name}`;
+    msg.textContent=e?.message?.toLowerCase().includes('invalid')||e?.message?.toLowerCase().includes('credentials')?'Incorrect password — try again.':e?.message||'Sign in failed.';
+    btn.disabled=false;btn.textContent='Sign in';
   }
 }
 
@@ -1824,12 +1895,17 @@ async function init(){
   // Check for an existing session first (returning user, or magic link redirect)
   const{data:{session},error}=await sb.auth.getSession();
   if(session){
-    await onSignedIn(session);
-  } else {
-    // No session — show login screen and listen for sign-in
+    if(window.location.hash.includes('type=recovery')){
+      showSetPasswordView(session,true);
+    }else{
+      await onSignedIn(session);
+    }
+  }else{
     document.getElementById('auth-screen').style.display='flex';
     sb.auth.onAuthStateChange(async(event,newSession)=>{
-      if(event==='SIGNED_IN'&&newSession){
+      if(event==='PASSWORD_RECOVERY'&&newSession){
+        showSetPasswordView(newSession,true);
+      }else if(event==='SIGNED_IN'&&newSession){
         await onSignedIn(newSession);
       }
     });
@@ -1844,17 +1920,7 @@ async function onSignedIn(session){
   // Simpler check: if the user has no password_hash they signed in via OTP
   const needsPassword=session?.user?.user_metadata?.has_password!==true&&signInMethod==='email';
 
-  if(needsPassword){
-    // Show set-password screen before entering the app
-    currentUser=resolveUser(session.user.email);
-    updateSidebarUser(session);
-    document.getElementById('auth-login-view').style.display='none';
-    document.getElementById('auth-magic-view').style.display='none';
-    document.getElementById('auth-sent-view').style.display='none';
-    document.getElementById('auth-set-password-view').style.display='block';
-    document.getElementById('auth-screen').style.display='flex';
-    return;
-  }
+  if(needsPassword){showSetPasswordView(session);return;}
   await completeSignIn();
 }
 
@@ -1930,7 +1996,8 @@ function showPanel(id,el){
   if(id==='dashboard'){if(!wxData)fetchWeather();calYear=TRIP_YEAR;calMonth=7;renderCalendar();renderDashboardHero();}
   if(id==='map'){setTimeout(()=>{if(!leafletMap)initMap();else leafletMap.invalidateSize();},100);}
   if(id==='notes'){if(!appState.notes)appState.notes=[];renderNotesList();}
-  if(id==='tasks')renderTasks();
+  if(id==='tasks')renderTasks();if(id==='budget')fetchExchangeRate();
+
 }
 function setUser(u){currentUser=u;renderWishlist();renderPacking();}
 function setConn(type,text){const el=document.getElementById('conn-badge');el.className='conn-badge conn-'+type;el.innerHTML=`<div class="conn-dot"></div><span>${text}</span>`;}
@@ -1959,7 +2026,7 @@ function renderItinerary(){
   const c=document.getElementById('days-container');c.innerHTML='';
   let totalEvents=0,activeDays=0,freeDays=0;
   appState.days.forEach((day,di)=>{
-    const hasActivity=day.events.some(e=>['dive','sail','kite','hike','history'].includes(e.tag));
+    const hasActivity=day.events.some(e=>['dive','sail','kite','hike','history','explore'].includes(e.tag));
     if(hasActivity)activeDays++;else freeDays++;
     totalEvents+=day.events.length;
     const actOrder=['dive','sail','kite','hike','history','travel','explore','general','free'];
@@ -2011,7 +2078,7 @@ function renderItinerary(){
       evList.appendChild(row);
     });
     const addForm=document.createElement('div');addForm.className='add-event-form';
-    addForm.innerHTML=`<input type="text" name="text" placeholder="Add event…"><input type="text" name="time" placeholder="time" style="width:60px"><select name="tag"><option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel">travel</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(${di},this)">+ Add</button>`;
+    addForm.innerHTML=`<input type="text" name="text" placeholder="Add event…"><input type="text" name="time" placeholder="time" style="width:60px"><select name="tag"><option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel">travel</option><option value="explore">explore</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(${di},this)">+ Add</button>`;
     body.appendChild(evList);body.appendChild(addForm);wrap.appendChild(hdr);wrap.appendChild(body);c.appendChild(wrap);
   });
   document.getElementById('stat-days').textContent=appState.days.length;
@@ -2718,8 +2785,8 @@ const TRIP_YEAR = 2026;
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 // tag → chip class
-const CHIP_CLASS = {dive:'chip-dive',sail:'chip-sail',kite:'chip-kite',hike:'chip-hike',history:'chip-history',free:'chip-free',travel:'chip-travel',general:'chip-free',explore:'chip-sail'};
-const TAG_COLORS = {dive:['#D4F0E8','#1A7A6A'],sail:['#D6ECF5','#1B5E7B'],kite:['#FAECD6','#C4762A'],hike:['#E8F5E0','#2D6B1A'],history:['#EDE8FC','#4A35A0'],free:['#EDE4CC','#4A4540'],travel:['#FAE0E0','#B84040']};
+const CHIP_CLASS = {dive:'chip-dive',sail:'chip-sail',kite:'chip-kite',hike:'chip-hike',history:'chip-history',free:'chip-free',travel:'chip-travel',general:'chip-free',explore:'chip-explore'};
+const TAG_COLORS = {dive:['#D4F0E8','#1A7A6A'],sail:['#D6ECF5','#1B5E7B'],kite:['#FAECD6','#C4762A'],hike:['#E8F5E0','#2D6B1A'],history:['#EDE8FC','#4A35A0'],free:['#EDE4CC','#4A4540'],travel:['#FAE0E0','#B84040'],explore:['#D6ECF5','#267DA8']};
 
 let calYear = TRIP_YEAR;
 let calMonth = 7; // 0-indexed → August
@@ -3383,15 +3450,45 @@ function renderDashboardHero(){
   if(!pills)return;
   const counts={};
   (appState.days||[]).forEach(d=>d.events.forEach(ev=>{
-    if(['dive','sail','kite','hike','history'].includes(ev.tag))counts[ev.tag]=(counts[ev.tag]||0)+1;
+    if(['dive','sail','kite','hike','history','explore'].includes(ev.tag))counts[ev.tag]=(counts[ev.tag]||0)+1;
   }));
-  const icons={dive:'🤿',sail:'⛵',kite:'🪁',hike:'🥾',history:'🏛'};
+  const icons={dive:'🤿',sail:'⛵',kite:'🪁',hike:'🥾',history:'🏛',explore:'🧭'};
   pills.innerHTML='';
   Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([tag,n])=>{
     const d=document.createElement('div');d.className='dash-hero-pill';
     d.textContent=`${icons[tag]} ${n} ${tag}`;pills.appendChild(d);
   });
 }
+let _gbpEurRate=1.17;
+async function fetchExchangeRate(){
+  const lbl=document.getElementById('conv-rate-lbl');
+  const dot=document.getElementById('conv-rate-dot');
+  if(lbl)lbl.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;display:inline-block"></span> Fetching rate…`;
+  try{
+    const res=await fetch('https://open.er-api.com/v6/latest/GBP');
+    if(!res.ok)throw new Error();
+    const data=await res.json();
+    if(!data.rates?.EUR)throw new Error();
+    _gbpEurRate=data.rates.EUR;
+    const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    if(lbl)lbl.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;display:inline-block"></span> 1 GBP = ${_gbpEurRate.toFixed(4)} EUR · Updated ${t}`;
+  }catch(e){
+    if(lbl)lbl.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:var(--ink3);flex-shrink:0;display:inline-block"></span> 1 GBP ≈ ${_gbpEurRate.toFixed(2)} EUR (offline estimate)`;
+  }
+}
+function convertCurrency(from){
+  const g=document.getElementById('conv-gbp');
+  const e=document.getElementById('conv-eur');
+  if(!g||!e)return;
+  if(from==='gbp'){
+    const v=parseFloat(g.value);
+    e.value=isNaN(v)||g.value===''?'':(v*_gbpEurRate).toFixed(2);
+  }else{
+    const v=parseFloat(e.value);
+    g.value=isNaN(v)||e.value===''?'':(v/_gbpEurRate).toFixed(2);
+  }
+}
+
 /* ══ UTILS ══ */
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
