@@ -502,6 +502,52 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .day-row.day-type-explore{border-left-color:#267DA8;border-left-width:3px}
 .day-hdr-tag{flex-shrink:0;pointer-events:none;font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:500;border:none;align-self:center}
 .notes-back-btn{display:none;align-items:center;font-size:.78rem;font-weight:500;color:var(--sea);background:none;border:none;padding:0 10px 0 0;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap}
+/* ── OVERDUE TASKS ── */
+.task-due-overdue{color:var(--coral)!important;font-weight:500}
+
+/* ── PACK FILTER ── */
+.pack-filter-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.pack-filter-btn.active{background:var(--sea)!important;color:var(--white)!important;border-color:var(--sea)!important}
+
+/* ── PINNED NOTES ── */
+.note-item.pinned{border-left-color:var(--amber)!important}
+.note-pin-indicator{font-size:.7rem;margin-left:3px;vertical-align:middle}
+
+/* ── UTILITY MODALS ── */
+.mini-modal{background:var(--white);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mini-modal p{font-size:.88rem;color:var(--ink);margin-bottom:1.25rem;line-height:1.55;text-align:center}
+.mini-modal .modal-field{margin-bottom:1rem}
+
+/* ── MOBILE MOVE BUTTONS ── */
+.move-btn{display:none}
+@media(max-width:680px){
+  .move-btn{display:inline-flex!important;align-items:center;justify-content:center;width:26px;height:26px;font-size:.8rem;padding:0;line-height:1}
+}
+/* ── MAP CONTROLS ── */
+.map-controls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:8px;flex-wrap:wrap}
+.map-controls-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.map-legend{margin:0;flex:1;display:flex;flex-wrap:wrap;gap:4px}
+.search-scope-row{display:flex;align-items:center;gap:7px;margin-bottom:.625rem;font-size:.75rem;color:var(--ink3)}
+
+/* ── MAP MOBILE CATEGORIES FIX ── */
+@media(max-width:680px){
+  .map-controls-row{flex-direction:column;align-items:stretch;gap:6px}
+  .map-controls-right{justify-content:space-between}
+  .map-legend{overflow-x:auto!important;flex-wrap:nowrap!important;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .map-legend::-webkit-scrollbar{display:none}
+  .map-legend .map-legend-item{flex-shrink:0}
+}
+
+/* ── QUICK-ADD PIN ── */
+.quick-add-pin{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1.25rem;margin-bottom:.75rem;box-shadow:0 1px 4px rgba(0,0,0,.05),0 0 0 0.5px rgba(26,26,26,.04)}
+.qap-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:8px}
+.qap-field label{display:block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:3px}
+.qap-field input,.qap-field select{font-family:'DM Sans',sans-serif;font-size:.85rem;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none;width:100%}
+.qap-field input:focus,.qap-field select:focus{border-color:var(--sea2)}
+/* ── NOTES COLLAB ── */
+@keyframes notePulse{0%,100%{opacity:1}50%{opacity:.35}}
+.partner-typing-dot{animation:notePulse 1.4s ease-in-out infinite}
+
 </style>
 </head>
 <body>
@@ -705,9 +751,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
           </div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:8px;flex-wrap:wrap">
-        <div class="map-legend" id="map-legend" style="margin:0;flex:1;display:flex;flex-wrap:wrap;gap:4px"></div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div class="search-scope-row">
+        <span>Searching:</span>
+        <div class="tile-toggle">
+          <button class="tile-btn active" id="scope-local" onclick="setSearchScope('local')">📍 Corfu</button>
+          <button class="tile-btn" id="scope-global" onclick="setSearchScope('global')">🌍 Anywhere</button>
+        </div>
+      </div>
+      <div class="map-controls-row">
+        <div class="map-legend" id="map-legend"></div>
+        <div class="map-controls-right">
           <div class="tile-toggle">
             <button class="tile-btn active" id="tile-map" onclick="setTileLayer('map')">🗺 Map</button>
             <button class="tile-btn" id="tile-sat" onclick="setTileLayer('satellite')">🛰 Satellite</button>
@@ -1130,7 +1183,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
       <div class="card">
         <div id="wish-list"><div class="empty">No activities yet.</div></div>
         <div class="form-row">
-          <input type="text" id="wish-input" placeholder="Add an activity…">
+          <input type="text" id="wish-input" placeholder="Add an activity…" onkeydown="if(event.key==='Enter')addWish()">
           <button class="btn btn-primary btn-sm" onclick="addWish()">+ Add</button>
         </div>
       </div>
@@ -1242,12 +1295,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
       <div class="card">
         <div class="card-title">Expenses</div>
         <div id="expense-list"><div class="empty">No expenses yet.</div></div>
-        <div class="form-row">
-          <input type="text" id="exp-desc" placeholder="Description">
-          <input type="number" id="exp-amt" placeholder="£">
-          <select id="exp-cat"><option>Flights</option><option>Accommodation</option><option>Diving</option><option>Sailing</option><option>Kitesurfing</option><option>Food</option><option>Transport</option><option>Activities</option><option>Other</option></select>
-          <select id="exp-who"><option value="p1">Me</option><option value="p2">Partner</option><option value="both">Both</option></select>
-          <button class="btn btn-primary btn-sm" onclick="addExpense()">+ Add</button>
+        <div style="margin-top:10px">
+          <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add expense</button>
         </div>
       </div>
     </div>
@@ -1260,6 +1309,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
         <div class="progress-row">
           <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pack-prog" style="width:0%"></div></div>
           <span class="progress-label" id="pack-label">0 / 31 packed</span>
+        </div>
+        <div class="pack-filter-row">
+          <span style="font-size:.75rem;color:var(--ink3);font-weight:500">Show:</span>
+          <button class="btn btn-sm pack-filter-btn active" onclick="setPackFilter('all',this)">All</button>
+          <button class="btn btn-sm pack-filter-btn" onclick="setPackFilter('p1',this)">My items</button>
+          <button class="btn btn-sm pack-filter-btn" onclick="setPackFilter('p2',this)">Partner's items</button>
         </div>
         <div id="pack-container"><div class="pack-section">
       <div class="pack-cat-header">
@@ -1902,13 +1957,14 @@ async function init(){
     }
   }else{
     document.getElementById('auth-screen').style.display='flex';
-    sb.auth.onAuthStateChange(async(event,newSession)=>{
+    const{data:{subscription}}=sb.auth.onAuthStateChange(async(event,newSession)=>{
       if(event==='PASSWORD_RECOVERY'&&newSession){
         showSetPasswordView(newSession,true);
       }else if(event==='SIGNED_IN'&&newSession){
         await onSignedIn(newSession);
       }
     });
+    window._authSub=subscription;
   }
 }
 async function onSignedIn(session){
@@ -1928,8 +1984,10 @@ async function completeSignIn(){
   const{data:{session}}=await sb.auth.getSession();
   if(!session)return;
   currentSession=session;
-  // Mark that this user has a password set
-  await sb.auth.updateUser({data:{has_password:true}});
+  // Only set flag once, not on every login
+  if(session.user.user_metadata?.has_password!==true){
+    await sb.auth.updateUser({data:{has_password:true}});
+  }
   currentUser=resolveUser(session.user.email);
   document.getElementById('auth-screen').style.display='none';
   updateSidebarUser(session);
@@ -1942,6 +2000,9 @@ async function completeSignIn(){
     console.error(e);setConn('err','Offline mode');loadLocal();
   }
   render();
+  initNotesCollab();
+  // Unsubscribe the init-time listener before registering the session listener
+  if(window._authSub){window._authSub.unsubscribe();window._authSub=null;}
   sb.auth.onAuthStateChange((event,s)=>{
     if(event==='SIGNED_OUT'){signOut();}
     if(event==='TOKEN_REFRESHED'&&s){currentSession=s;updateSidebarUser(s);}
@@ -1961,7 +2022,7 @@ async function loadFromDB(){
 }
 function scheduleSave(){
   clearTimeout(saveTimer);
-  if(document.getElementById('panel-dashboard').classList.contains('active')){renderCalendar();renderDashboardHero();}
+if(document.getElementById('panel-dashboard').classList.contains('active')){renderCalendar();renderDashboardHero();}
   if(document.getElementById('panel-tasks').classList.contains('active'))renderTasks();
   saveTimer=setTimeout(async()=>{
     saveLocal();if(!sb||!currentSession)return;
@@ -2006,7 +2067,8 @@ function flash(msg){const el=document.getElementById('status-bar');el.textConten
 function render(){
   renderItinerary();renderWishlist();renderBudget();renderPacking();
   if(leafletMap)renderMapMarkers();
-  if(document.getElementById('panel-dashboard').classList.contains('active'))renderCalendar();
+  if(document.getElementById('panel-dashboard').classList.contains('active')){renderCalendar();renderDashboardHero();}
+  if(document.getElementById('panel-notes').classList.contains('active'))renderNotesList();
 }
 
 /* ══ DRAG HELPERS ══ */
@@ -2051,6 +2113,7 @@ function renderItinerary(){
       </div>
       ${day.events.length?`<span class="day-hdr-tag tag-${topTag}">${topTag}</span>`:''}
       <div class="day-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-icon btn-sm" title="Share day plan" onclick="shareDayItinerary(${di})">📤</button>
         <button class="btn btn-icon btn-sm" title="Duplicate day" onclick="duplicateDay(${di})">⧉</button>
         <button class="btn btn-icon btn-sm btn-danger" title="Remove day" onclick="removeDay(${di})">✕</button>
       </div>
@@ -2078,7 +2141,7 @@ function renderItinerary(){
       evList.appendChild(row);
     });
     const addForm=document.createElement('div');addForm.className='add-event-form';
-    addForm.innerHTML=`<input type="text" name="text" placeholder="Add event…"><input type="text" name="time" placeholder="time" style="width:60px"><select name="tag"><option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel">travel</option><option value="explore">explore</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(${di},this)">+ Add</button>`;
+    addForm.innerHTML=`<input type="text" name="text" placeholder="Add event…" onkeydown="if(event.key==='Enter'){const f=this.closest('.add-event-form');addEvent(${di},f.querySelector('.btn'));}"><input type="text" name="time" placeholder="time" style="width:60px"><select name="tag"><option value="dive">dive</option><option value="sail">sail</option><option value="kite">kite</option><option value="hike">hike</option><option value="history">history</option><option value="free">free</option><option value="travel">travel</option><option value="general">general</option><option value="explore">explore</option></select><button class="btn btn-primary btn-sm" onclick="addEvent(${di},this)">+ Add</button>`;
     body.appendChild(evList);body.appendChild(addForm);wrap.appendChild(hdr);wrap.appendChild(body);c.appendChild(wrap);
   });
   document.getElementById('stat-days').textContent=appState.days.length;
@@ -2091,8 +2154,8 @@ function addEvent(di,btn){
   const f=btn.closest('.add-event-form');const text=f.querySelector('[name=text]').value.trim();const time=f.querySelector('[name=time]').value.trim();const tag=f.querySelector('[name=tag]').value;
   if(!text)return;appState.days[di].events.push({time,text,tag});f.querySelector('[name=text]').value='';f.querySelector('[name=time]').value='';scheduleSave();renderItinerary();
 }
-function removeDay(di){if(!confirm('Remove this day?'))return;appState.days.splice(di,1);scheduleSave();renderItinerary();}
-function duplicateDay(di){const d=JSON.parse(JSON.stringify(appState.days[di]));d.id=appState.days.length+1;d.label+=' (copy)';appState.days.splice(di+1,0,d);scheduleSave();renderItinerary();}
+function removeDay(di){confirmAction('Remove this day and all its events?',()=>{appState.days.splice(di,1);scheduleSave();renderItinerary();});}
+function duplicateDay(di){const d=JSON.parse(JSON.stringify(appState.days[di]));d.id=Math.max(...appState.days.map(x=>x.id),0)+1;d.label+=' (copy)';appState.days.splice(di+1,0,d);scheduleSave();renderItinerary();}
 function addDay(){
   const id=appState.days.length+1;
   appState.days.push({id,date:'New day',label:'Untitled',events:[]});
@@ -2151,7 +2214,8 @@ function renderBudget(){
   exps.forEach((exp,i)=>{
     const wc=exp.who==='p1'?'who-p1':exp.who==='p2'?'who-p2':'who-both';const wl=exp.who==='p1'?'Y':exp.who==='p2'?'P':'B';
     const div=document.createElement('div');div.className='expense-item';
-    div.innerHTML=`<div class="who-dot ${wc}">${wl}</div><div class="exp-info"><div class="exp-name">${exp.desc}</div><div class="exp-cat">${exp.cat}</div></div><div class="exp-amt">£${Math.round(exp.amount).toLocaleString()}</div><button class="del-btn" onclick="removeExpense(${i})" aria-label="remove">✕</button>`;
+    const eurAmt=Math.round(exp.amount*_gbpEurRate);
+    div.innerHTML=`<div class="who-dot ${wc}">${wl}</div><div class="exp-info"><div class="exp-name">${exp.desc}</div><div class="exp-cat">${exp.cat}</div></div><div class="exp-amt"><div>£${Math.round(exp.amount).toLocaleString()}</div><div style="font-size:.72rem;color:var(--ink3)">€${eurAmt.toLocaleString()}</div></div><button class="del-btn" title="Edit" onclick="openExpenseModal(${i})" style="opacity:.6;font-size:.8rem">✏</button><button class="del-btn" onclick="removeExpense(${i})" aria-label="remove">✕</button>`;
     c.appendChild(div);
   });
 }
@@ -2175,6 +2239,8 @@ function renderPacking(){
       <div class="pack-cat-header">
         <input class="pack-cat-title-input" value="${esc(cat)}" title="Click to rename category"
           onchange="renameCat('${catKey}',this.value)">
+        <button class="btn btn-sm btn-icon" title="Check all" onclick="checkAllInCat('${catKey}',true)">☑</button>
+        <button class="btn btn-sm btn-icon" title="Uncheck all" onclick="checkAllInCat('${catKey}',false)">☐</button>
         <button class="btn btn-sm btn-icon" onclick="addPackItem('${catKey}')" title="Add item">+</button>
         <button class="btn btn-sm btn-icon btn-danger" onclick="removeCat('${catKey}')" title="Remove category">✕</button>
       </div>
@@ -2183,9 +2249,14 @@ function renderPacking(){
     const grid=sec.querySelector('.pack-grid');
     items.forEach((item,i)=>{
       total++;if(item.checked)done++;
+    });
+    items.forEach((item,i)=>{
       const who=item.who||'both';
+      // Visual filter — hide non-matching items but keep in DOM so drag indices stay valid
+      const hidden=packFilter!=='all'&&item.who!=='both'&&item.who!==packFilter;
       const whoClass='pack-who-'+who;
       const el=document.createElement('div');el.className='pack-item'+(item.checked?' checked':'');
+      if(hidden)el.style.display='none';
       el.draggable=true;
       el.addEventListener('dragstart',e=>onDragStart(e,'pack-'+catKey,i));
       el.addEventListener('dragover',e=>onDragOver(e,el));
@@ -2220,27 +2291,26 @@ function removePackItem(catKey,i){
 }
 function addPackItem(catKey){
   const cat=Object.keys(appState.pack).find(k=>k.replace(/\s/g,'_')===catKey)||catKey;
-  const text=prompt('New item name:');if(!text||!text.trim())return;
-  appState.pack[cat].push({text:text.trim(),checked:false,who:'both'});scheduleSave();renderPacking();
+  promptAction('New item name','e.g. Sunscreen',v=>{appState.pack[cat].push({text:v,checked:false,who:'both'});scheduleSave();renderPacking();});
 }
 function renameCat(catKey,newName){
   if(!newName.trim())return;
   const oldCat=Object.keys(appState.pack).find(k=>k.replace(/\s/g,'_')===catKey)||catKey;
   if(oldCat===newName)return;
-  const items=appState.pack[oldCat];
+  if(appState.pack[newName.trim()]){flash('A category with that name already exists');renderPacking();return;}
   const newPack={};
   Object.keys(appState.pack).forEach(k=>{newPack[k===oldCat?newName:k]=appState.pack[k];});
   appState.pack=newPack;scheduleSave();renderPacking();
 }
 function removeCat(catKey){
   const cat=Object.keys(appState.pack).find(k=>k.replace(/\s/g,'_')===catKey)||catKey;
-  if(!confirm(`Remove category "${cat}" and all its items?`))return;
-  delete appState.pack[cat];scheduleSave();renderPacking();
+  confirmAction(`Remove category "${cat}" and all its items?`,()=>{delete appState.pack[cat];scheduleSave();renderPacking();});
 }
 function addPackCat(){
-  const name=prompt('New category name:');if(!name||!name.trim())return;
-  if(appState.pack[name.trim()]){flash('Category already exists');return;}
-  appState.pack[name.trim()]=[];scheduleSave();renderPacking();
+  promptAction('New category name','e.g. Electronics',v=>{
+    if(appState.pack[v]){flash('Category already exists');return;}
+    appState.pack[v]=[];scheduleSave();renderPacking();
+  });
 }
 
 /* ══ WEATHER ══ */
@@ -2253,6 +2323,10 @@ const TRIP_DAYS  = 12;
 
 async function fetchWeather(){
   try{
+    const cached=localStorage.getItem('wxCache');
+    if(cached){const{data,ts}=JSON.parse(cached);if(Date.now()-ts<3*60*60*1000){wxData=data;renderWeather();return;}}
+  }catch(e){}
+  try{
     // Request exactly Aug 7–18 using start_date / end_date params
     const url=`https://api.open-meteo.com/v1/forecast?latitude=39.6243&longitude=19.9217&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,uv_index_max&timezone=Europe%2FAthens&start_date=${TRIP_START}&end_date=${TRIP_END}`;
     const res=await fetch(url);if(!res.ok)throw new Error();
@@ -2264,6 +2338,7 @@ async function fetchWeather(){
       return out;
     };
     wxData={...json,daily:sliceFields(json.daily)};
+    try{localStorage.setItem('wxCache',JSON.stringify({data:wxData,ts:Date.now()}));}catch(e){}
   }catch(e){wxData=buildClimateData();}
   renderWeather();
 }
@@ -2511,9 +2586,17 @@ function onMapSearchKey(e){
 
 async function fetchNominatim(query,target,callback){
   try{
-    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query+', Corfu, Greece')}&format=json&limit=5&addressdetails=1`;
-    const res=await fetch(url,{headers:{'Accept-Language':'en'}});
-    const data=await res.json();
+    const local=searchScope!=='global';
+    const q=local?query+', Corfu, Greece':query;
+    let url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=8&addressdetails=1`;
+    let res=await fetch(url,{headers:{'Accept-Language':'en'}});
+    let data=await res.json();
+    // Smart fallback: if local search returns fewer than 2 results, retry unrestricted
+    if(local&&data.length<2){
+      url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&addressdetails=1`;
+      res=await fetch(url,{headers:{'Accept-Language':'en'}});
+      data=await res.json();
+    }
     if(target==='map')showMapAC(data);
     else if(callback)callback(data);
   }catch(e){console.warn('Nominatim error',e);}
@@ -2541,15 +2624,7 @@ function selectMapAC(r){
   document.getElementById('map-search').value=r.display_name.split(',').slice(0,2).join(',');
   document.getElementById('map-search-clear').style.display='block';
   if(leafletMap){leafletMap.setView([lat,lng],15);}
-  openPinModal();
-  setTimeout(()=>{
-    document.getElementById('pin-lat').value=lat.toFixed(4);
-    document.getElementById('pin-lng').value=lng.toFixed(4);
-    const nameGuess=r.display_name.split(',')[0];
-    document.getElementById('pin-name').value=nameGuess;
-    document.getElementById('pin-pick-hint').style.display='none';
-    pickingCoords=false;
-  },60);
+  showQuickAddPin(lat,lng,r.display_name.split(',')[0].trim());
 }
 
 function clearMapSearch(){
@@ -2773,9 +2848,10 @@ function savePinModal(){
   closePinModal();scheduleSave();renderMapMarkers();renderMapLegend();flash(editingPinIdx!==null?'Pin updated ✓':'Pin added ✓');
 }
 function deletePin(idx){
-  if(!confirm('Remove this pin?'))return;
-  hideHoverCard();
-  appState.pins.splice(idx,1);scheduleSave();renderMapMarkers();
+  confirmAction('Remove this pin?',()=>{
+    hideHoverCard();
+    appState.pins.splice(idx,1);scheduleSave();renderMapMarkers();
+  });
 }
 
 /* ══ CALENDAR ══ */
@@ -3005,10 +3081,11 @@ function addNote(){
 }
 
 function deleteNote(id){
-  if(!confirm('Delete this note?'))return;
-  appState.notes=appState.notes.filter(n=>n.id!==id);
-  if(activeNoteId===id){activeNoteId=null;document.getElementById('notes-editor').innerHTML='<div class="notes-empty-state"><div class="empty-icon">📝</div><p>Select a note to read it<br>or create a new one</p></div>';document.querySelector('.notes-layout')?.classList.remove('note-open');}
-  scheduleSave();renderNotesList();
+  confirmAction('Delete this note?',()=>{
+    appState.notes=appState.notes.filter(n=>n.id!==id);
+    if(activeNoteId===id){activeNoteId=null;document.getElementById('notes-editor').innerHTML='<div class="notes-empty-state"><div class="empty-icon">📝</div><p>Select a note to read it<br>or create a new one</p></div>';document.querySelector('.notes-layout')?.classList.remove('note-open');}
+    scheduleSave();renderNotesList();
+  });
 }
 
 function openNote(id){
@@ -3022,9 +3099,12 @@ function openNote(id){
   const tagBadges=note.tags.map(t=>`<span class="note-tag ${NOTE_TAG_STYLES[t]||''}">${t}</span>`).join('');
 
   document.getElementById('notes-editor').innerHTML=`
-    <div class="notes-editor-header" style="display:flex;align-items:center">
+    <div class="notes-editor-header" style="display:flex;align-items:center;gap:6px">
+      <button class="notes-back-btn" onclick="closeMobileNote()" style="order:-1">← Notes</button>
       <input type="text" value="${esc(note.title)}" placeholder="Note title…"
-        onchange="updateNoteTitle('${id}',this.value)" oninput="updateNoteTitle('${id}',this.value)" style="flex:1"><button class="notes-back-btn" onclick="closeMobileNote()" style="order:-1">← Notes</button>
+        onchange="updateNoteTitle('${id}',this.value)" oninput="updateNoteTitle('${id}',this.value)" style="flex:1">
+      <button id="pin-btn-${id}" onclick="togglePinNote('${id}')" title="${note.pinned?'Unpin':'Pin'} note"
+        style="background:${note.pinned?'var(--amber-lt)':'transparent'};border:1px solid ${note.pinned?'var(--amber)':'var(--border)'};border-radius:7px;padding:4px 8px;cursor:pointer;font-size:.85rem;flex-shrink:0;font-family:'DM Sans',sans-serif">📌</button>
     </div>
     <div class="notes-editor-meta">
       <span class="notes-editor-meta-item">Created ${created}</span>
@@ -3032,6 +3112,7 @@ function openNote(id){
       <span class="notes-editor-meta-item">Updated ${updated}</span>
       ${note.tags.length?`<span class="notes-editor-meta-item">·</span><div class="notes-tag-list">${tagBadges}</div>`:''}
       <button class="toolbar-btn btn-danger" style="margin-left:auto;font-size:.72rem;padding:2px 8px" onclick="deleteNote('${id}')">🗑 Delete</button>
+      <div id="partner-editing-badge" style="display:none;align-items:center;gap:5px;font-size:.72rem;color:var(--teal);padding:2px 8px;background:var(--teal-lt);border-radius:20px;flex-shrink:0"></div>
     </div>
     <div class="notes-toolbar">
       <button class="toolbar-btn" onclick="noteFormat('bold')" title="Bold"><b>B</b></button>
@@ -3052,6 +3133,8 @@ function openNote(id){
       <div contenteditable="true" id="note-body-${id}"
         data-placeholder="Start writing your note…"
         onInput="updateNoteBody('${id}',this)"
+        onfocus="_noteEditorFocused=true;broadcastNotePresence('${id}')"
+        onblur="_noteEditorFocused=false"
         onkeydown="handleNoteKeydown(event)">${note.body}</div>
     </div>`;
   if(window.innerWidth<=680)document.querySelector('.notes-layout')?.classList.add('note-open');
@@ -3067,6 +3150,7 @@ function updateNoteBody(id,el){
   const note=appState.notes.find(n=>n.id===id);if(!note)return;
   note.body=el.innerHTML;note.updated=new Date().toISOString();
   scheduleSave();
+  broadcastNoteChange(id,el.innerHTML);
 }
 
 function toggleNoteTag(id,tag){
@@ -3094,7 +3178,9 @@ function handleNoteKeydown(e){
 function renderNotesList(){
   if(!appState.notes)appState.notes=[];
   const search=(document.getElementById('notes-search')?.value||'').toLowerCase();
-  const filtered=appState.notes.filter(n=>!search||n.title.toLowerCase().includes(search)||n.body.replace(/<[^>]*>/g,'').toLowerCase().includes(search));
+  const filtered=appState.notes
+    .filter(n=>!search||n.title.toLowerCase().includes(search)||n.body.replace(/<[^>]*>/g,'').toLowerCase().includes(search))
+    .sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
   document.getElementById('notes-count').textContent=`${appState.notes.length} note${appState.notes.length!==1?'s':''}`;
   const c=document.getElementById('notes-list');
   if(!filtered.length){c.innerHTML=`<div style="padding:1rem;text-align:center;font-size:.8rem;color:var(--ink3)">${search?'No notes match your search':'No notes yet — create one!'}</div>`;return;}
@@ -3104,8 +3190,8 @@ function renderNotesList(){
     const preview=note.body.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
     const tags=note.tags.slice(0,2).map(t=>`<span class="note-tag ${NOTE_TAG_STYLES[t]||''}">${t}</span>`).join('');
     const div=document.createElement('div');
-    div.className='note-item'+(note.id===activeNoteId?' active':'');
-    div.innerHTML=`<div class="note-item-title">${esc(note.title)||'Untitled'}</div>${preview?`<div class="note-item-preview">${esc(preview)}</div>`:''}<div class="note-item-meta"><span class="note-item-date">${updated}</span>${tags}</div>`;
+    div.className='note-item'+(note.id===activeNoteId?' active':'')+(note.pinned?' pinned':'');
+    div.innerHTML=`<div class="note-item-title">${esc(note.title)||'Untitled'}${note.pinned?'<span class="note-pin-indicator">📌</span>':''}</div>${preview?`<div class="note-item-preview">${esc(preview)}</div>`:''}<div class="note-item-meta"><span class="note-item-date">${updated}</span>${tags}</div>`;
     div.onclick=()=>openNote(note.id);
     c.appendChild(div);
   });
@@ -3185,7 +3271,7 @@ function openTaskModal(id){
 
 function saveTask(){
   const name=document.getElementById('tm-name').value.trim();
-  if(!name){alert('Please enter a task name');return;}
+  if(!name){flash('Please enter a task name');return;}
   if(!appState.tasks)appState.tasks=[];
   const id=editingTaskId||('task-'+Date.now());
   const task={
@@ -3209,10 +3295,11 @@ function saveTask(){
 }
 
 function deleteTask(id){
-  if(!confirm('Delete this task?'))return;
-  appState.tasks=(appState.tasks||[]).filter(t=>t.id!==id);
-  document.getElementById('task-modal-overlay')?.remove();
-  scheduleSave();renderTasks();
+  confirmAction('Delete this task?',()=>{
+    appState.tasks=(appState.tasks||[]).filter(t=>t.id!==id);
+    document.getElementById('task-modal-overlay')?.remove();
+    scheduleSave();renderTasks();
+  });
 }
 
 function setTaskStatus(id,status){
@@ -3305,7 +3392,7 @@ function renderTaskList(){
         ${task.cat?`<span class="task-tag" style="background:var(--sand2);color:var(--ink2)">${task.cat}</span>`:''}
         ${taskPriHtml(task.pri)}
         ${taskAvatarHtml(task.who)}
-        ${task.due?`<span class="task-due">📅 ${task.due}</span>`:''}`;
+        ${task.due?`<span class="task-due${task.status!=='done'&&new Date(task.due)<new Date()?' task-due-overdue':''}">📅 ${task.due}</span>`:''}`;
       wrap.appendChild(row);
     });
     c.appendChild(wrap);
@@ -3486,6 +3573,289 @@ function convertCurrency(from){
   }else{
     const v=parseFloat(e.value);
     g.value=isNaN(v)||e.value===''?'':(v/_gbpEurRate).toFixed(2);
+  }
+}
+/* ══ UTILITY MODALS (replace prompt / confirm) ══ */
+function confirmAction(msg,cb){
+  document.getElementById('confirm-overlay')?.remove();
+  const o=document.createElement('div');
+  o.id='confirm-overlay';o.className='task-modal-overlay';
+  o.innerHTML=`<div class="mini-modal"><p>${msg}</p><div class="modal-actions" style="justify-content:center"><button class="btn" onclick="document.getElementById('confirm-overlay').remove()">Cancel</button><button class="btn btn-danger" id="confirm-ok">Confirm</button></div></div>`;
+  document.body.appendChild(o);
+  document.getElementById('confirm-ok').onclick=()=>{o.remove();cb();};
+  o.onclick=e=>{if(e.target===o)o.remove();};
+}
+function promptAction(label,ph,cb){
+  document.getElementById('prompt-overlay')?.remove();
+  const o=document.createElement('div');
+  o.id='prompt-overlay';o.className='task-modal-overlay';
+  o.innerHTML=`<div class="mini-modal" style="text-align:left"><div class="modal-field"><label style="display:block;font-size:.78rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${label}</label><input id="prompt-inp" type="text" placeholder="${ph}" style="width:100%;font-family:'DM Sans',sans-serif;font-size:.9rem;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none"></div><div class="modal-actions"><button class="btn" onclick="document.getElementById('prompt-overlay').remove()">Cancel</button><button class="btn btn-primary" id="prompt-ok">Add</button></div></div>`;
+  document.body.appendChild(o);
+  const inp=document.getElementById('prompt-inp');
+  document.getElementById('prompt-ok').onclick=()=>{const v=inp.value.trim();if(v){o.remove();cb(v);}};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){const v=inp.value.trim();if(v){o.remove();cb(v);}}});
+  o.onclick=e=>{if(e.target===o)o.remove();};
+  setTimeout(()=>inp.focus(),50);
+}
+
+/* ══ EXPENSE MODAL ══ */
+let _editingExpIdx=null;
+function openExpenseModal(i){
+  _editingExpIdx=(i!==undefined&&i!==null)?i:null;
+  const exp=_editingExpIdx!==null?(appState.expenses||[])[_editingExpIdx]:null;
+  document.getElementById('expense-modal-overlay')?.remove();
+  const o=document.createElement('div');
+  o.id='expense-modal-overlay';o.className='task-modal-overlay';
+  o.onclick=e=>{if(e.target===o)o.remove();};
+  o.innerHTML=`<div class="task-modal" style="max-width:420px">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem">${exp?'Edit expense':'Add expense'}</h3>
+    <div class="modal-field"><label>Description</label><input id="em-desc" type="text" placeholder="What was it?" value="${esc(exp?.desc||'')}"></div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Amount (£)</label><input id="em-amt" type="number" placeholder="0.00" step="0.01" value="${exp?.amount||''}"></div>
+      <div class="modal-field"><label>Category</label>
+        <select id="em-cat">${['Flights','Accommodation','Diving','Sailing','Kitesurfing','Food','Transport','Activities','Other'].map(c=>`<option${exp?.cat===c?' selected':''}>${c}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="modal-field"><label>Paid by</label>
+      <select id="em-who">
+        <option value="p1"${(!exp||exp.who==='p1')?' selected':''}>Me</option>
+        <option value="p2"${exp?.who==='p2'?' selected':''}>Partner</option>
+        <option value="both"${exp?.who==='both'?' selected':''}>Both</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      ${exp?`<button class="btn btn-danger btn-sm" onclick="deleteCurrentExpense()">Delete</button>`:''}
+      <button class="btn" onclick="document.getElementById('expense-modal-overlay').remove()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpenseModal()">Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  setTimeout(()=>document.getElementById('em-desc')?.focus(),50);
+}
+function saveExpenseModal(){
+  const desc=document.getElementById('em-desc').value.trim();
+  const amount=parseFloat(document.getElementById('em-amt').value);
+  const cat=document.getElementById('em-cat').value;
+  const who=document.getElementById('em-who').value;
+  if(!desc||isNaN(amount)||amount<=0){flash('Please fill in description and amount');return;}
+  if(!appState.expenses)appState.expenses=[];
+  if(_editingExpIdx!==null){appState.expenses[_editingExpIdx]={desc,amount,cat,who};}
+  else{appState.expenses.push({desc,amount,cat,who});}
+  document.getElementById('expense-modal-overlay').remove();
+  scheduleSave();renderBudget();
+}
+function deleteCurrentExpense(){
+  confirmAction('Delete this expense?',()=>{
+    removeExpense(_editingExpIdx);
+    document.getElementById('expense-modal-overlay')?.remove();
+  });
+}
+
+/* ══ PACKING FILTER + CHECK-ALL ══ */
+let packFilter='all';
+function setPackFilter(f,btn){
+  packFilter=f;
+  document.querySelectorAll('.pack-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPacking();
+}
+function checkAllInCat(catKey,checked){
+  const cat=Object.keys(appState.pack).find(k=>k.replace(/\s/g,'_')===catKey)||catKey;
+  (appState.pack[cat]||[]).forEach(item=>item.checked=checked);
+  scheduleSave();renderPacking();
+}
+
+/* ══ PIN NOTES ══ */
+function togglePinNote(id){
+  const note=appState.notes.find(n=>n.id===id);if(!note)return;
+  note.pinned=!note.pinned;
+  scheduleSave();renderNotesList();
+  const btn=document.getElementById(`pin-btn-${id}`);
+  if(btn){btn.style.background=note.pinned?'var(--amber-lt)':'transparent';btn.style.borderColor=note.pinned?'var(--amber)':'var(--border)';}
+}
+
+/* ══ MOVE HELPERS ══ */
+function moveDay(di,dir){
+  const arr=appState.days;const ni=di+dir;
+  if(ni<0||ni>=arr.length)return;
+  [arr[di],arr[ni]]=[arr[ni],arr[di]];
+  scheduleSave();renderItinerary();
+}
+function moveEvent(di,ei,dir){
+  const arr=appState.days[di].events;const ni=ei+dir;
+  if(ni<0||ni>=arr.length)return;
+  [arr[ei],arr[ni]]=[arr[ni],arr[ei]];
+  scheduleSave();renderItinerary();
+}
+
+/* ══ SHARE DAY ══ */
+function shareDayItinerary(di){
+  const day=appState.days[di];if(!day)return;
+  const icons={dive:'🤿',sail:'⛵',kite:'🪁',hike:'🥾',history:'🏛',travel:'✈️',free:'🌴',explore:'🧭',general:'📌'};
+  const lines=[`📅 ${day.date} — ${day.label}`,``];
+  day.events.forEach(ev=>lines.push(`${icons[ev.tag]||'•'} ${ev.time?ev.time+' · ':''}${ev.text}`));
+  lines.push(``,`📍 Corfu 2026`);
+  const text=lines.join('\n');
+  if(navigator.share){navigator.share({title:`Corfu – ${day.date}`,text}).catch(()=>{});}
+  else{navigator.clipboard.writeText(text).then(()=>flash('Day plan copied ✓')).catch(()=>flash('Could not copy'));}
+}
+
+/* ══ DASHBOARD SUMMARY ══ */
+function renderDashboardSummary(){
+  const el=document.getElementById('dash-summary');if(!el)return;
+  const tasks=appState.tasks||[];
+  const todo=tasks.filter(t=>t.status!=='done').length;
+  const overdue=tasks.filter(t=>t.status!=='done'&&t.due&&new Date(t.due)<new Date()).length;
+  const budget=appState.budget||0;
+  const spent=(appState.expenses||[]).reduce((a,e)=>a+e.amount,0);
+  const pct=budget>0?Math.min(100,Math.round(spent/budget*100)):0;
+  const packItems=Object.values(appState.pack||{}).flat();
+  const packDone=packItems.filter(i=>i.checked).length;
+  const packPct=packItems.length?Math.round(packDone/packItems.length*100):0;
+  const noteCount=(appState.notes||[]).length;
+  const pinnedCount=(appState.notes||[]).filter(n=>n.pinned).length;
+  el.innerHTML=`<div class="stats-grid" style="margin-bottom:0">
+    <div class="stat-card" style="cursor:pointer" onclick="showPanel('tasks',document.querySelector('.nav-item[onclick*=tasks]'))">
+      <div class="stat-label">Tasks remaining</div>
+      <div class="stat-value" style="font-size:1.4rem">${todo}</div>
+      <div style="font-size:.72rem;margin-top:2px;color:${overdue?'var(--coral)':'var(--teal)'}">${overdue?`⚠ ${overdue} overdue`:'All on track ✓'}</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPanel('budget',document.querySelector('.nav-item[onclick*=budget]'))">
+      <div class="stat-label">Budget used</div>
+      <div class="stat-value" style="font-size:1.4rem">${budget>0?pct+'%':'£'+Math.round(spent)}</div>
+      <div style="font-size:.72rem;margin-top:2px;color:var(--ink3)">${budget>0?`£${Math.round(spent).toLocaleString()} of £${budget.toLocaleString()}`:'No budget set yet'}</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPanel('packing',document.querySelector('.nav-item[onclick*=packing]'))">
+      <div class="stat-label">Packing</div>
+      <div class="stat-value" style="font-size:1.4rem">${packPct}%</div>
+      <div style="font-size:.72rem;margin-top:2px;color:var(--ink3)">${packDone} of ${packItems.length} items</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPanel('notes',document.querySelector('.nav-item[onclick*=notes]'))">
+      <div class="stat-label">Notes</div>
+      <div class="stat-value" style="font-size:1.4rem">${noteCount}</div>
+      <div style="font-size:.72rem;margin-top:2px;color:var(--ink3)">${pinnedCount} pinned</div>
+    </div>
+  </div>`;
+}
+/* ══ MAP SEARCH SCOPE + QUICK-ADD ══ */
+let searchScope='local';
+function setSearchScope(scope){
+  searchScope=scope;
+  document.getElementById('scope-local')?.classList.toggle('active',scope==='local');
+  document.getElementById('scope-global')?.classList.toggle('active',scope==='global');
+  clearMapSearch();
+  document.getElementById('quick-add-pin')?.remove();
+}
+function showQuickAddPin(lat,lng,nameGuess){
+  document.getElementById('quick-add-pin')?.remove();
+  const panel=document.createElement('div');
+  panel.id='quick-add-pin';panel.className='quick-add-pin';
+  panel.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)">📍 Save this place?</span>
+      <button onclick="document.getElementById('quick-add-pin').remove()" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:.85rem;padding:0;line-height:1">✕</button>
+    </div>
+    <div class="qap-row">
+      <div class="qap-field" style="flex:1;min-width:130px">
+        <label>Name</label>
+        <input id="qap-name" type="text" value="${esc(nameGuess)}" placeholder="Place name">
+      </div>
+      <div class="qap-field" style="min-width:110px">
+        <label>Category</label>
+        <select id="qap-cat">
+          ${Object.entries(CAT_STYLE).map(([c,s])=>`<option value="${c}">${s.icon} ${c}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end;padding-bottom:1px">
+        <button class="btn btn-primary btn-sm" onclick="saveQuickPin(${lat},${lng})">+ Save pin</button>
+        <button class="btn btn-sm" onclick="openFullPinDetails(${lat},${lng})">Full details</button>
+      </div>
+    </div>`;
+  document.querySelector('#panel-map .dir-panel')?.insertAdjacentElement('beforebegin',panel);
+  setTimeout(()=>{const inp=document.getElementById('qap-name');if(inp){inp.focus();inp.select();}},50);
+}
+function saveQuickPin(lat,lng){
+  const name=document.getElementById('qap-name')?.value.trim();
+  const cat=document.getElementById('qap-cat')?.value;
+  if(!name){flash('Please enter a name');return;}
+  if(!appState.pins)appState.pins=[];
+  appState.pins.push({name,cat,lat,lng,note:''});
+  document.getElementById('quick-add-pin')?.remove();
+  clearMapSearch();
+  scheduleSave();renderMapMarkers();renderMapLegend();
+  flash(`${name} saved ✓`);
+}
+function openFullPinDetails(lat,lng){
+  const name=document.getElementById('qap-name')?.value.trim()||'';
+  const cat=document.getElementById('qap-cat')?.value||'General';
+  document.getElementById('quick-add-pin')?.remove();
+  openPinModal();
+  setTimeout(()=>{
+    document.getElementById('pin-lat').value=lat;
+    document.getElementById('pin-lng').value=lng;
+    document.getElementById('pin-name').value=name;
+    document.getElementById('pin-cat').value=cat;
+    document.getElementById('pin-pick-hint').style.display='none';
+    pickingCoords=false;
+    if(leafletMap)document.getElementById('map').style.cursor='';
+  },60);
+}
+/* ══ NOTES LIVE COLLABORATION ══ */
+let _notesChannel=null,_noteEditorFocused=false,_partnerPresenceTimer=null,_broadcastNoteDebounce=null;
+
+function initNotesCollab(){
+  if(!sb)return;
+  _notesChannel=sb.channel('notes-live-corfu2026',{config:{broadcast:{self:false}}});
+  _notesChannel
+    .on('broadcast',{event:'note-change'},({payload})=>onPartnerNoteChange(payload))
+    .on('broadcast',{event:'note-presence'},({payload})=>onPartnerPresence(payload))
+    .subscribe();
+}
+
+function broadcastNoteChange(noteId,content){
+  clearTimeout(_broadcastNoteDebounce);
+  _broadcastNoteDebounce=setTimeout(()=>{
+    _notesChannel?.send({type:'broadcast',event:'note-change',payload:{noteId,content,user:currentUser}});
+  },300);
+}
+
+function broadcastNotePresence(noteId){
+  _notesChannel?.send({type:'broadcast',event:'note-presence',payload:{noteId,user:currentUser,ts:Date.now()}});
+}
+
+function onPartnerNoteChange({noteId,content,user}){
+  const note=(appState.notes||[]).find(n=>n.id===noteId);
+  if(note){note.body=content;note.updated=new Date().toISOString();}
+  if(activeNoteId===noteId){
+    // Only update the DOM if the current user isn't actively typing (avoids cursor jump)
+    if(!_noteEditorFocused){
+      const el=document.getElementById(`note-body-${noteId}`);
+      if(el)el.innerHTML=content;
+    }
+    clearTimeout(_partnerPresenceTimer);
+    _updatePartnerBadge(true,user);
+    _partnerPresenceTimer=setTimeout(()=>_updatePartnerBadge(false),4000);
+  }
+  if(document.getElementById('panel-notes')?.classList.contains('active'))renderNotesList();
+}
+
+function onPartnerPresence({noteId,user}){
+  clearTimeout(_partnerPresenceTimer);
+  if(activeNoteId===noteId){
+    _updatePartnerBadge(true,user);
+    _partnerPresenceTimer=setTimeout(()=>_updatePartnerBadge(false),4000);
+  }
+}
+
+function _updatePartnerBadge(visible,user){
+  const b=document.getElementById('partner-editing-badge');
+  if(!b)return;
+  if(visible){
+    const name=user==='p1'?'Joshua':'Allie';
+    b.style.display='flex';
+    b.innerHTML=`<span class="partner-typing-dot" style="width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;display:inline-block"></span>&nbsp;${name} is editing`;
+  }else{
+    b.style.display='none';
   }
 }
 
