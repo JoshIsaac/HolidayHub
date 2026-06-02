@@ -17,8 +17,8 @@
   --teal:#1A7A6A;--teal-lt:#D4F0E8;
   --amber:#C4762A;--amber-lt:#FAECD6;
   --coral:#B84040;--coral-lt:#FAE0E0;
-  --white:#FFFFFF;--border:rgba(26,26,26,0.12);
-  --radius:10px;--radius-lg:16px;
+  --white:#FFFFFF;--border:rgba(26,26,26,0.08);
+  --radius:10px;--radius-lg:14px;
 }
 html{font-size:15px}
 body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;min-height:100dvh;line-height:1.6}
@@ -80,7 +80,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .stat-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--ink)}
 
 /* ── BUTTONS ── */
-.btn{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
+.btn{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
 .btn:hover{background:var(--sand);border-color:var(--ink3)}
 .btn-primary{background:var(--sea);color:var(--white);border-color:var(--sea)}
 .btn-primary:hover{background:var(--sea2);border-color:var(--sea2)}
@@ -164,8 +164,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .wish-badge{font-size:.7rem;padding:2px 8px;border-radius:20px;background:var(--teal-lt);color:var(--teal);font-weight:500;flex-shrink:0}
 
 /* ── BUDGET ── */
-.budget-bar-wrap{height:8px;background:var(--sand2);border-radius:4px;margin:8px 0 1.25rem;overflow:hidden}
-.budget-bar-fill{height:8px;border-radius:4px;background:var(--sea);transition:width .4s}
+.budget-bar-wrap{height:4px;background:var(--sand2);border-radius:2px;margin:8px 0 1.25rem;overflow:hidden}
+.budget-bar-fill{height:4px;border-radius:2px;background:var(--sea);transition:width .4s}
 .budget-bar-fill.over{background:var(--coral)}
 .expense-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .expense-item:last-of-type{border-bottom:none}
@@ -184,8 +184,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 
 /* ── PACKING ── */
 .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
-.progress-bar-wrap{flex:1;height:6px;background:var(--sand2);border-radius:3px;overflow:hidden}
-.progress-bar-fill{height:6px;border-radius:3px;background:var(--teal);transition:width .3s}
+.progress-bar-wrap{flex:1;height:4px;background:var(--sand2);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:4px;border-radius:2px;background:var(--teal);transition:width .3s}
 .progress-label{font-size:.8rem;color:var(--ink3);min-width:70px;text-align:right}
 .pack-section{margin-bottom:1rem}
 .pack-cat-header{display:flex;align-items:center;gap:8px;margin:1rem 0 .4rem}
@@ -430,8 +430,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .notes-empty-state .empty-icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
 .notes-empty-state p{font-size:.875rem;line-height:1.6}
 @media(max-width:680px){
-  .notes-layout{grid-template-columns:1fr;height:auto}
-  .notes-sidebar{height:200px}
+  .notes-layout{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column}
+  .notes-sidebar{height:auto!important;max-height:45vh;overflow-y:auto}
 }
 
 .bottom-tabs,.more-sheet,.more-sheet-backdrop{display:none}
@@ -463,6 +463,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
   .bottom-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:0.5px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:150}
   .more-sheet-backdrop.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200}
   .more-sheet.open{display:block;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:8px 0 calc(16px + env(safe-area-inset-bottom));z-index:201}
+  .notes-editor{display:none}
+  .notes-layout.note-open .notes-sidebar{display:none}
+  .notes-layout.note-open .notes-editor{display:flex;min-height:60vh}
+  .notes-back-btn{display:inline-flex!important}
+  .notes-toolbar{overflow-x:auto;flex-wrap:nowrap;padding:.4rem .5rem}
+  .toolbar-btn{white-space:nowrap;flex-shrink:0}
+  .notes-body [contenteditable]{min-height:300px;font-size:16px}
+  .day-hdr-tag{display:none}
 }
 .sidebar-brand{padding:1rem 1.5rem .875rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .sidebar-brand-logo{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--white)}
@@ -491,6 +499,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);mi
 .day-row.day-type-travel{border-left-color:#B84040;border-left-width:3px}
 .day-row.day-type-free{border-left-color:var(--sand2);border-left-width:3px}
 .day-row.day-type-explore{border-left-color:#267DA8;border-left-width:3px}
+.day-hdr-tag{flex-shrink:0;pointer-events:none;font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:500;border:none;align-self:center}
+.notes-back-btn{display:none;align-items:center;font-size:.78rem;font-weight:500;color:var(--sea);background:none;border:none;padding:0 10px 0 0;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1954,6 +1964,7 @@ function renderItinerary(){
     totalEvents+=day.events.length;
     const actOrder=['dive','sail','kite','hike','history','travel','explore','general','free'];
     const topTag=actOrder.find(t=>day.events.some(e=>e.tag===t))||'free';
+    const dayNumBg={'dive':'#1A7A6A','sail':'#1B5E7B','kite':'#C4762A','hike':'#2D6B1A','history':'#4A35A0','travel':'#B84040','explore':'#267DA8','general':'#4A4540','free':'#8A8178'}[topTag]||'var(--sea)';
     const wrap=document.createElement('div');wrap.className=`day-row draggable day-type-${topTag}`;
     wrap.draggable=true;
     wrap.addEventListener('dragstart',e=>onDragStart(e,'days',di));
@@ -1963,7 +1974,7 @@ function renderItinerary(){
     const hdr=document.createElement('div');hdr.className='day-header';
     hdr.innerHTML=`
       <div class="day-header-left">
-        <div class="day-num">${day.id}</div>
+        <div class="day-num" style="background:${dayNumBg}">${day.id}</div>
         <div class="day-meta">
           <input class="day-title-input" value="${esc(day.date)}" placeholder="Date" onclick="event.stopPropagation()"
             onchange="appState.days[${di}].date=this.value;scheduleSave()" style="margin-bottom:2px">
@@ -1971,6 +1982,7 @@ function renderItinerary(){
             onchange="appState.days[${di}].label=this.value;scheduleSave()">
         </div>
       </div>
+      ${day.events.length?`<span class="day-hdr-tag tag-${topTag}">${topTag}</span>`:''}
       <div class="day-actions" onclick="event.stopPropagation()">
         <button class="btn btn-icon btn-sm" title="Duplicate day" onclick="duplicateDay(${di})">⧉</button>
         <button class="btn btn-icon btn-sm btn-danger" title="Remove day" onclick="removeDay(${di})">✕</button>
@@ -2928,7 +2940,7 @@ function addNote(){
 function deleteNote(id){
   if(!confirm('Delete this note?'))return;
   appState.notes=appState.notes.filter(n=>n.id!==id);
-  if(activeNoteId===id){activeNoteId=null;document.getElementById('notes-editor').innerHTML='<div class="notes-empty-state"><div class="empty-icon">📝</div><p>Select a note to read it<br>or create a new one</p></div>';}
+  if(activeNoteId===id){activeNoteId=null;document.getElementById('notes-editor').innerHTML='<div class="notes-empty-state"><div class="empty-icon">📝</div><p>Select a note to read it<br>or create a new one</p></div>';document.querySelector('.notes-layout')?.classList.remove('note-open');}
   scheduleSave();renderNotesList();
 }
 
@@ -2943,9 +2955,9 @@ function openNote(id){
   const tagBadges=note.tags.map(t=>`<span class="note-tag ${NOTE_TAG_STYLES[t]||''}">${t}</span>`).join('');
 
   document.getElementById('notes-editor').innerHTML=`
-    <div class="notes-editor-header">
+    <div class="notes-editor-header" style="display:flex;align-items:center">
       <input type="text" value="${esc(note.title)}" placeholder="Note title…"
-        onchange="updateNoteTitle('${id}',this.value)" oninput="updateNoteTitle('${id}',this.value)">
+        onchange="updateNoteTitle('${id}',this.value)" oninput="updateNoteTitle('${id}',this.value)" style="flex:1"><button class="notes-back-btn" onclick="closeMobileNote()" style="order:-1">← Notes</button>
     </div>
     <div class="notes-editor-meta">
       <span class="notes-editor-meta-item">Created ${created}</span>
@@ -2975,6 +2987,7 @@ function openNote(id){
         onInput="updateNoteBody('${id}',this)"
         onkeydown="handleNoteKeydown(event)">${note.body}</div>
     </div>`;
+  if(window.innerWidth<=680)document.querySelector('.notes-layout')?.classList.add('note-open');
 }
 
 function updateNoteTitle(id,val){
@@ -3029,6 +3042,12 @@ function renderNotesList(){
     div.onclick=()=>openNote(note.id);
     c.appendChild(div);
   });
+}
+function closeMobileNote(){
+  document.querySelector('.notes-layout')?.classList.remove('note-open');
+  activeNoteId=null;
+  document.getElementById('notes-editor').innerHTML='<div class="notes-empty-state"><div class="empty-icon">📝</div><p>Select a note to read it<br>or create a new one</p></div>';
+  renderNotesList();
 }
 function openNoteFromPin(noteId){
   if(leafletMap)leafletMap.closePopup();
