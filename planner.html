@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sand:#F3EDE0;--sand2:#EDE4CC;
+  --ink:#1A1A1A;--ink2:#4A4540;--ink3:#8A8178;
+  --sea:#1B5E7B;--sea2:#267DA8;--sea-lt:#D6ECF5;
+  --teal:#1A7A6A;--teal-lt:#D4F0E8;
+  --amber:#C4762A;--amber-lt:#FAECD6;
+  --coral:#B84040;--coral-lt:#FAE0E0;
+  --white:#FFFFFF;--border:rgba(26,26,26,0.08);
+  --radius:10px;--radius-lg:14px;
+}
+html{font-size:15px}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;line-height:1.6;overflow-x:hidden}
+/* AUTH */
+#auth-screen{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.auth-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.auth-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:500;margin-bottom:.25rem}
+.auth-logo span{color:var(--sea2)}
+.auth-sub{font-size:.85rem;color:var(--ink3);margin-bottom:2rem}
+.auth-field{margin-bottom:1rem}
+.auth-field label{display:block;font-size:.78rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.auth-field input{width:100%;font-family:'DM Sans',sans-serif;font-size:.95rem;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--sand);color:var(--ink);outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--sea2)}
+.auth-btn{width:100%;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;padding:11px;border-radius:8px;border:none;background:var(--sea);color:var(--white);cursor:pointer;transition:background .15s;margin-top:.25rem}
+.auth-btn:hover{background:var(--sea2)}
+.auth-btn:disabled{background:var(--ink3);cursor:not-allowed}
+.auth-msg{font-size:.82rem;margin-top:.75rem;padding:8px 12px;border-radius:7px;text-align:center;display:none}
+.auth-msg.success{background:var(--teal-lt);color:var(--teal);display:block}
+.auth-msg.error{background:var(--coral-lt);color:var(--coral);display:block}
+.auth-btn-p1{background:var(--sea)!important}
+.auth-btn-p2{background:var(--teal)!important;margin-top:.75rem!important}
+.auth-resend{font-size:.8rem;color:var(--sea);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif}
+/* HEADER */
+.app-header{background:var(--ink);color:var(--white);height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.header-back{font-size:.78rem;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;padding:0;transition:color .15s;white-space:nowrap}
+.header-back:hover{color:rgba(255,255,255,.9)}
+.header-trip{display:flex;align-items:center;gap:.625rem;flex:1;justify-content:center;min-width:0;padding:0 1rem}
+.header-trip-emoji{font-size:1.2rem;line-height:1;flex-shrink:0}
+.header-trip-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:500;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.conn-badge{font-size:.7rem;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.conn-dot{width:6px;height:6px;border-radius:50%}
+.conn-ok{background:rgba(26,122,106,.2);color:#1A7A6A}.conn-ok .conn-dot{background:#1A7A6A}
+.conn-err{background:rgba(184,64,64,.2);color:var(--coral)}.conn-err .conn-dot{background:var(--coral)}
+.conn-wait{background:rgba(196,118,42,.2);color:var(--amber)}.conn-wait .conn-dot{background:var(--amber)}
+.btn-ghost-sm{background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.85);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:4px 10px;border-radius:7px;cursor:pointer;transition:all .12s}
+.btn-ghost-sm:hover{background:rgba(255,255,255,.1)}
+/* NAV */
+.app-nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:100;overflow-x:auto;scrollbar-width:none}
+.app-nav::-webkit-scrollbar{display:none}
+.nav-inner{display:flex;min-width:max-content;padding:0 1rem}
+.nav-tab{font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;padding:0 1rem;height:44px;display:flex;align-items:center;gap:6px;border:none;background:none;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:var(--ink)}
+.nav-tab.active{color:var(--sea);border-bottom-color:var(--sea)}
+/* PANELS */
+.panel{display:none;min-height:calc(100vh - 100px);padding:1.5rem}
+.panel.active{display:block}
+#panel-map{padding:0;display:none}
+#panel-map.active{display:flex}
+/* BUTTONS */
+.btn{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--sand)}
+.btn-primary{background:var(--sea);color:var(--white);border-color:var(--sea)}
+.btn-primary:hover{background:var(--sea2)}
+.btn-danger{background:var(--coral-lt);color:var(--coral);border-color:rgba(184,64,64,.2)}
+.btn-danger:hover{background:var(--coral);color:var(--white)}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.btn-xs{padding:3px 8px;font-size:.7rem}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:1rem;padding:3px;opacity:.45;transition:opacity .1s;line-height:1}
+.icon-btn:hover{opacity:1}
+/* PANEL HEADER */
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.panel-hdr-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:500}
+.panel-hdr-sub{font-size:.78rem;color:var(--ink3);margin-top:2px}
+/* DASHBOARD */
+.dash-hero{border-radius:var(--radius-lg);padding:2rem;position:relative;overflow:hidden;color:var(--white);margin-bottom:1.25rem}
+.dash-bg-emoji{position:absolute;right:-1rem;top:-1rem;font-size:8rem;opacity:.07;pointer-events:none;line-height:1;user-select:none;transform:rotate(-8deg)}
+.dash-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;opacity:.6;margin-bottom:.4rem}
+.dash-name{font-family:'Playfair Display',serif;font-size:2rem;font-weight:500;line-height:1.1;margin-bottom:.35rem}
+.dash-meta{font-size:.875rem;opacity:.75;margin-bottom:1rem}
+.dash-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem}
+.dash-pill{background:rgba(255,255,255,.15);color:rgba(255,255,255,.95);font-size:.76rem;padding:4px 12px;border-radius:20px;font-weight:500}
+.dash-countdown{position:absolute;right:2rem;top:50%;transform:translateY(-50%);text-align:right}
+.dash-count-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;line-height:1}
+.dash-count-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;opacity:.55}
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.875rem;margin-bottom:1.25rem}
+.stat-card{background:var(--white);border-radius:var(--radius);padding:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06);cursor:pointer;transition:box-shadow .15s}
+.stat-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.stat-icon{font-size:1.4rem;margin-bottom:.4rem;display:block}
+.stat-value{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:500;line-height:1;margin-bottom:2px}
+.stat-label{font-size:.72rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+/* ITINERARY */
+.day-card{background:var(--white);border-radius:var(--radius-lg);margin-bottom:.875rem;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06)}
+.day-hdr{padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.day-title{font-weight:600;font-size:.9rem;color:var(--ink)}
+.day-date{font-size:.75rem;color:var(--ink3)}
+.day-items{padding:.625rem 0}
+.day-item{padding:.5rem 1.25rem;display:flex;align-items:flex-start;gap:.75rem;position:relative;group}
+.day-item:hover{background:var(--sand)}
+.day-item:hover .item-actions{opacity:1}
+.item-time{font-size:.72rem;color:var(--ink3);min-width:3.5rem;padding-top:2px;font-variant-numeric:tabular-nums}
+.item-icon{font-size:1.1rem;line-height:1;flex-shrink:0;margin-top:1px}
+.item-text{font-size:.88rem;color:var(--ink);flex:1}
+.item-notes{font-size:.75rem;color:var(--ink3);margin-top:2px}
+.item-actions{opacity:0;transition:opacity .15s;display:flex;gap:4px;flex-shrink:0}
+.day-add{padding:.625rem 1.25rem}
+/* NOTES */
+.notes-meta{font-size:.72rem;color:var(--ink3);margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+#notes-area{width:100%;min-height:calc(100vh - 200px);font-family:'DM Sans',sans-serif;font-size:.9rem;line-height:1.75;padding:1.25rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--white);color:var(--ink);resize:none;outline:none;transition:border-color .15s}
+#notes-area:focus{border-color:var(--sea2)}
+/* WISHLIST */
+.wish-item{background:var(--white);border-radius:var(--radius);padding:.875rem 1.25rem;margin-bottom:.625rem;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06)}
+.wish-text{flex:1;font-size:.9rem;color:var(--ink)}
+.wish-votes{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.vote-btn{background:none;border:none;cursor:pointer;font-size:.85rem;padding:4px 8px;border-radius:7px;transition:background .1s;font-family:'DM Sans',sans-serif;color:var(--ink3)}
+.vote-btn:hover{background:var(--sand)}
+.vote-btn.voted{color:var(--sea);font-weight:600}
+/* TASKS */
+.task-item{background:var(--white);border-radius:var(--radius);padding:.75rem 1.25rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.875rem;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06);transition:opacity .2s}
+.task-item.done{opacity:.5}
+.task-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:var(--sand);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .1s}
+.task-check.checked{background:var(--teal);border-color:var(--teal);color:var(--white)}
+.task-text{flex:1;font-size:.88rem}
+.task-text.done-txt{text-decoration:line-through;color:var(--ink3)}
+.task-who{font-size:.68rem;color:var(--ink3);background:var(--sand);padding:2px 8px;border-radius:20px;flex-shrink:0}
+/* BUDGET */
+.budget-summary{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06)}
+.budget-total-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:500}
+.budget-total-sub{font-size:.8rem;color:var(--ink3);margin-top:2px}
+.budget-rate{font-size:.75rem;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.budget-rate input{width:52px;font-family:'DM Sans',sans-serif;font-size:.75rem;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--sand);color:var(--ink);outline:none}
+.budget-table{width:100%;border-collapse:collapse}
+.budget-table th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);text-align:left;padding:.5rem .875rem;border-bottom:1px solid var(--border)}
+.budget-table td{font-size:.85rem;padding:.625rem .875rem;border-bottom:1px solid rgba(26,26,26,.04);vertical-align:middle}
+.budget-table tr:hover td{background:var(--sand)}
+.budget-table tr:last-child td{border-bottom:none}
+.cat-pill{font-size:.68rem;padding:2px 8px;border-radius:20px;background:var(--sand2);color:var(--ink2);font-weight:500;white-space:nowrap}
+.budget-total-row td{font-weight:600;border-top:2px solid var(--border)!important;background:var(--sand)!important;font-size:.9rem}
+/* PACKING */
+.pack-progress{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(26,26,26,.06)}
+.pack-bar-track{background:var(--sand2);border-radius:10px;height:8px;margin:.75rem 0 .375rem;overflow:hidden}
+.pack-bar-fill{background:var(--teal);height:100%;border-radius:10px;transition:width .4s ease}
+.pack-cat-section{margin-bottom:1rem}
+.pack-cat-hdr{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);padding:.5rem 0;display:flex;align-items:center;justify-content:space-between}
+.pack-item{background:var(--white);border-radius:var(--radius);padding:.625rem 1rem;margin-bottom:.375rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 1px 3px rgba(0,0,0,.03),0 0 0 .5px rgba(26,26,26,.05)}
+.pack-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:var(--sand);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .1s}
+.pack-check.packed{background:var(--teal);border-color:var(--teal);color:var(--white)}
+.pack-text{flex:1;font-size:.85rem}
+.pack-who{font-size:.65rem;color:var(--ink3);background:var(--sand);padding:2px 7px;border-radius:20px}
+/* MAP */
+#map-wrap{flex:1;position:relative;height:calc(100vh - 100px)}
+#leaflet-map{width:100%;height:100%}
+#map-pins-panel{width:260px;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.map-pins-hdr{padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.map-pins-hdr-title{font-weight:600;font-size:.875rem}
+.pin-item{padding:.75rem 1rem;border-bottom:1px solid rgba(26,26,26,.04);display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:background .1s}
+.pin-item:hover{background:var(--sand)}
+.pin-icon{font-size:1.2rem;line-height:1}
+.pin-name{font-size:.85rem;font-weight:500;flex:1}
+.pin-note{font-size:.72rem;color:var(--ink3)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:1.5rem;overflow-y:auto}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:1.75rem;width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:500;margin-bottom:1.25rem}
+.modal-field{margin-bottom:.875rem}
+.modal-field label{display:block;font-size:.72rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:.875rem;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none;transition:border-color .15s}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--sea2)}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:.875rem;border-top:1px solid var(--border)}
+.icon-pick-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.icon-pick-btn{padding:5px;border-radius:6px;border:2px solid transparent;background:var(--sand);font-size:1.1rem;cursor:pointer;text-align:center;transition:all .1s;line-height:1.3;font-family:inherit}
+.icon-pick-btn:hover{background:var(--sea-lt)}
+.icon-pick-btn.selected{background:var(--sea-lt);border-color:var(--sea)}
+/* STATUS BAR */
+.status-bar{position:fixed;bottom:1.25rem;right:1.5rem;background:var(--ink);color:var(--white);padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300}
+.status-bar.show{opacity:1}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--ink3)}
+.empty-state-icon{font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.3}
+.empty-state p{font-size:.875rem;margin-bottom:1.25rem}
+/* RESPONSIVE */
+@media(max-width:640px){
+  .app-header{padding:0 1rem}
+  .dash-countdown{display:none}
+  .panel{padding:1rem}
+  #map-pins-panel{display:none}
+  .modal-row{grid-template-columns:1fr}
+  .budget-table{font-size:.8rem}
+  .budget-table th,.budget-table td{padding:.4rem .625rem}
+  input,select,textarea{font-size:16px!important}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" style="display:flex">
+  <div class="auth-card">
+    <div id="auth-login-view">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub" id="auth-who-sub">Who's planning?</div>
+      <div id="auth-person-picker" style="display:flex;flex-direction:column">
+        <button class="auth-btn auth-btn-p1" onclick="showSignInForm('p1')">&#128100; Sign in as Joshua</button>
+        <button class="auth-btn auth-btn-p2" onclick="showSignInForm('p2')">&#128100; Sign in as Allie</button>
+      </div>
+      <form id="auth-password-form" style="display:none" onsubmit="submitSignIn();return false">
+        <input type="email" id="auth-form-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
+        <div class="auth-field"><label>Password</label>
+          <input type="password" id="auth-form-password" autocomplete="current-password" placeholder="Your password"></div>
+        <button type="submit" class="auth-btn" id="auth-form-btn">Sign in</button>
+        <div style="text-align:center;margin-top:.875rem">
+          <button type="button" class="auth-resend" onclick="backToPicker()">&#8592; Change person</button>
+          &nbsp;&#183;&nbsp;
+          <button type="button" class="auth-resend" onclick="showMagicLinkView()">Magic link instead</button>
+        </div>
+      </form>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+    <div id="auth-magic-view" style="display:none">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub">We'll email you a login link</div>
+      <div class="auth-field"><label>Email address</label>
+        <input type="email" id="auth-magic-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendMagicLink()"></div>
+      <button class="auth-btn" id="auth-magic-btn" onclick="sendMagicLink()">Send magic link</button>
+      <div class="auth-msg" id="auth-magic-msg"></div>
+      <div style="text-align:center;margin-top:1rem"><button class="auth-resend" onclick="showLoginView()">&#8592; Back</button></div>
+    </div>
+    <div id="auth-sent-view" style="display:none;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:.875rem">&#9993;&#65039;</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:.5rem">Check your email</h3>
+      <p style="font-size:.85rem;color:var(--ink3);line-height:1.6;margin-bottom:1.25rem">Sent to <strong id="auth-email-shown" style="color:var(--ink)"></strong></p>
+      <button class="auth-resend" onclick="showMagicLinkView()">&#8592; Try another email</button>
+    </div>
+    <div id="auth-set-password-view" style="display:none">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub" id="auth-set-pwd-sub">Set a password for future logins</div>
+      <input type="email" id="auth-set-pwd-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
+      <div class="auth-field"><label>New password</label>
+        <input type="password" id="auth-new-password" autocomplete="new-password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')document.getElementById('auth-confirm-password').focus()"></div>
+      <div class="auth-field"><label>Confirm password</label>
+        <input type="password" id="auth-confirm-password" autocomplete="new-password" placeholder="Repeat it" onkeydown="if(event.key==='Enter')setPassword()"></div>
+      <button class="auth-btn" id="auth-set-pwd-btn" onclick="setPassword()">Set password &amp; continue</button>
+      <div class="auth-msg" id="auth-set-pwd-msg"></div>
+      <div style="text-align:center;margin-top:1rem"><button class="auth-resend" onclick="skipSetPassword()">Skip for now</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP HEADER -->
+<header class="app-header">
+  <button class="header-back" onclick="goHome()">&#8592; All holidays</button>
+  <div class="header-trip">
+    <span class="header-trip-emoji" id="header-emoji">&#9992;&#65039;</span>
+    <span class="header-trip-name" id="header-trip-name">Loading…</span>
+  </div>
+  <div class="header-right">
+    <div id="conn-badge" class="conn-badge conn-wait"><div class="conn-dot"></div><span>&#8230;</span></div>
+    <button class="btn-ghost-sm" onclick="signOut()">Sign out</button>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<nav class="app-nav" id="app-nav" style="display:none">
+  <div class="nav-inner">
+    <button class="nav-tab active" data-panel="dashboard" onclick="switchPanel('dashboard')">&#127968; Dashboard</button>
+    <button class="nav-tab" data-panel="map" onclick="switchPanel('map')">&#128506; Map</button>
+    <button class="nav-tab" data-panel="itinerary" onclick="switchPanel('itinerary')">&#128197; Itinerary</button>
+    <button class="nav-tab" data-panel="notes" onclick="switchPanel('notes')">&#128221; Notes</button>
+    <button class="nav-tab" data-panel="wishlist" onclick="switchPanel('wishlist')">&#11088; Wishlist</button>
+    <button class="nav-tab" data-panel="tasks" onclick="switchPanel('tasks')">&#9989; Tasks</button>
+    <button class="nav-tab" data-panel="budget" onclick="switchPanel('budget')">&#128176; Budget</button>
+    <button class="nav-tab" data-panel="packing" onclick="switchPanel('packing')">&#127968; Packing</button>
+  </div>
+</nav>
+
+<!-- PANELS -->
+<div id="panel-dashboard" class="panel active"></div>
+
+<div id="panel-map" class="panel">
+  <div id="map-wrap"><div id="leaflet-map"></div></div>
+  <div id="map-pins-panel">
+    <div class="map-pins-hdr">
+      <span class="map-pins-hdr-title">Saved places</span>
+      <button class="btn btn-primary btn-sm" onclick="openPinModal()">+ Add</button>
+    </div>
+    <div id="pin-list"></div>
+  </div>
+</div>
+
+<div id="panel-itinerary" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-hdr-title">Itinerary</div><div class="panel-hdr-sub" id="itin-sub"></div></div>
+    <button class="btn btn-sm" onclick="addFreeDay()">+ Add day</button>
+  </div>
+  <div id="itin-days"></div>
+</div>
+
+<div id="panel-notes" class="panel">
+  <div class="panel-hdr">
+    <div class="panel-hdr-title">Notes</div>
+    <span id="notes-saved-lbl" style="font-size:.75rem;color:var(--ink3)"></span>
+  </div>
+  <textarea id="notes-area" placeholder="Notes, ideas, reminders, links…"></textarea>
+</div>
+
+<div id="panel-wishlist" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-hdr-title">Wishlist</div><div class="panel-hdr-sub">Things you both want to do</div></div>
+    <button class="btn btn-primary btn-sm" onclick="openWishModal()">+ Add</button>
+  </div>
+  <div id="wish-list"></div>
+</div>
+
+<div id="panel-tasks" class="panel">
+  <div class="panel-hdr">
+    <div><div class="panel-hdr-title">Tasks</div><div class="panel-hdr-sub" id="tasks-sub"></div></div>
+    <button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Add task</button>
+  </div>
+  <div id="tasks-list"></div>
+</div>
+
+<div id="panel-budget" class="panel">
+  <div id="budget-summary-block"></div>
+  <div class="panel-hdr" style="margin-bottom:.875rem">
+    <div class="panel-hdr-title">Expenses</div>
+    <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add expense</button>
+  </div>
+  <div style="overflow-x:auto"><table class="budget-table" id="budget-table">
+    <thead><tr>
+      <th>Description</th><th>Category</th><th>Amount</th><th>Who</th><th></th>
+    </tr></thead>
+    <tbody id="budget-tbody"></tbody>
+  </table></div>
+</div>
+
+<div id="panel-packing" class="panel">
+  <div id="pack-progress-block"></div>
+  <div class="panel-hdr" style="margin-bottom:.875rem">
+    <div class="panel-hdr-title">Packing list</div>
+    <button class="btn btn-primary btn-sm" onclick="openPackModal()">+ Add item</button>
+  </div>
+  <div id="packing-list"></div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Activity modal -->
+<div id="activity-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('activity-modal')">
+  <div class="modal">
+    <div class="modal-title" id="act-modal-title">Add activity</div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Time (optional)</label><input id="act-time" type="time"></div>
+      <div class="modal-field"><label>Icon</label>
+        <div class="icon-pick-grid" id="act-icon-grid"></div>
+      </div>
+    </div>
+    <div class="modal-field"><label>Activity</label><input id="act-text" type="text" placeholder="e.g. Morning hike to Porto Timoni"></div>
+    <div class="modal-field"><label>Notes (optional)</label><input id="act-notes" type="text" placeholder="e.g. Bring water, ~3h"></div>
+    <div class="modal-actions">
+      <button id="act-delete-btn" class="btn btn-danger btn-sm" style="display:none;margin-right:auto" onclick="deleteActivity()">Remove</button>
+      <button class="btn btn-sm" onclick="closeModal('activity-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveActivity()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pin modal -->
+<div id="pin-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('pin-modal')">
+  <div class="modal">
+    <div class="modal-title" id="pin-modal-title">Save a place</div>
+    <div class="modal-field"><label>Place name</label><input id="pin-name" type="text" placeholder="e.g. Kassiopi harbour"></div>
+    <div class="modal-field"><label>Note (optional)</label><input id="pin-note" type="text" placeholder="e.g. Great for sunset drinks"></div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Latitude</label><input id="pin-lat" type="number" step="any" placeholder="39.624"></div>
+      <div class="modal-field"><label>Longitude</label><input id="pin-lng" type="number" step="any" placeholder="19.922"></div>
+    </div>
+    <p style="font-size:.72rem;color:var(--ink3);margin-top:-.5rem;margin-bottom:.875rem">Tip: right-click on the map and copy coordinates, or use <a href="https://www.google.com/maps" target="_blank" style="color:var(--sea)">Google Maps</a>.</p>
+    <div class="modal-field"><label>Icon</label>
+      <div class="icon-pick-grid" id="pin-icon-grid"></div>
+    </div>
+    <div class="modal-actions">
+      <button id="pin-delete-btn" class="btn btn-danger btn-sm" style="display:none;margin-right:auto" onclick="deletePin()">Remove</button>
+      <button class="btn btn-sm" onclick="closeModal('pin-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="savePin()">Save place</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wishlist modal -->
+<div id="wish-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('wish-modal')">
+  <div class="modal">
+    <div class="modal-title">Add to wishlist</div>
+    <div class="modal-field"><label>What do you want to do?</label><input id="wish-text" type="text" placeholder="e.g. Watch the sunset from Angelokastro" onkeydown="if(event.key==='Enter')saveWish()"></div>
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('wish-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveWish()">Add to wishlist</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task modal -->
+<div id="task-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('task-modal')">
+  <div class="modal">
+    <div class="modal-title" id="task-modal-title">Add task</div>
+    <div class="modal-field"><label>Task</label><input id="task-text" type="text" placeholder="e.g. Book diving excursion" onkeydown="if(event.key==='Enter')saveTask()"></div>
+    <div class="modal-field"><label>Assign to</label>
+      <select id="task-who">
+        <option value="p1">Joshua</option>
+        <option value="p2">Allie</option>
+        <option value="both">Both</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button id="task-delete-btn" class="btn btn-danger btn-sm" style="display:none;margin-right:auto" onclick="deleteTask()">Remove</button>
+      <button class="btn btn-sm" onclick="closeModal('task-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveTask()">Save task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense modal -->
+<div id="expense-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('expense-modal')">
+  <div class="modal">
+    <div class="modal-title" id="exp-modal-title">Add expense</div>
+    <div class="modal-field"><label>Description</label><input id="exp-desc" type="text" placeholder="e.g. Flights to Corfu"></div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Amount (GBP)</label><input id="exp-amount" type="number" step="0.01" min="0" placeholder="0.00"></div>
+      <div class="modal-field"><label>Category</label>
+        <select id="exp-cat">
+          <option>Transport</option><option>Accommodation</option><option>Food &amp; Drink</option>
+          <option>Activities</option><option>Shopping</option><option>Health</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field"><label>Paid by</label>
+      <select id="exp-who">
+        <option value="p1">Joshua</option><option value="p2">Allie</option><option value="both">Both / shared</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button id="exp-delete-btn" class="btn btn-danger btn-sm" style="display:none;margin-right:auto" onclick="deleteExpense()">Remove</button>
+      <button class="btn btn-sm" onclick="closeModal('expense-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveExpense()">Save expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Packing modal -->
+<div id="pack-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('pack-modal')">
+  <div class="modal">
+    <div class="modal-title">Add packing item</div>
+    <div class="modal-field"><label>Item</label><input id="pack-text" type="text" placeholder="e.g. Underwater camera" onkeydown="if(event.key==='Enter')savePack()"></div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Category</label>
+        <select id="pack-cat">
+          <option>Clothing</option><option>Electronics</option><option>Documents</option>
+          <option>Toiletries</option><option>Activities / Sports</option><option>Medical</option><option>Other</option>
+        </select>
+      </div>
+      <div class="modal-field"><label>Who</label>
+        <select id="pack-who">
+          <option value="p1">Joshua</option><option value="p2">Allie</option><option value="both">Both</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-sm" onclick="closeModal('pack-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="savePack()">Add to list</button>
+    </div>
+  </div>
+</div>
+
+<div id="status-bar" class="status-bar"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" onerror="loadSbFallback()"></script>
+<script>
+function loadSbFallback(){const s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';document.head.appendChild(s);}
+</script>
+<script>
+/* ===================== CONFIG ===================== */
+const SUPABASE_URL='https://dvrbanhjauioaravcwsz.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cmJhbmhqYXVpb2FyYXZjd3N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzI4MDgsImV4cCI6MjA5NTcwODgwOH0.H-AJwVmq8eTpUy1uqENT0FUnnqb5DCXy5i2xBE';
+const P1_EMAIL='joshua_isaac@me.com';
+const P2_EMAIL='alliestott@icloud.com';
+const TRIPS_KEY='__trips__';
+
+/* ===================== CONSTANTS ===================== */
+const ACTIVITY_ICONS=['🌅','🏛','🍽','🤿','⛵','🪁','🥾','🛵','🏖','🛍','🎭','🌊','⛰','🚌','✈️','🍷','☕','💆','📷','🎪'];
+const PIN_ICONS=['📍','🏖','🤿','⛵','🍽','🏛','⛰','🌅','🍷','🛵','🎪','💆','🛍','🏊','🎯'];
+const COLOR_THEMES={mediterranean:'linear-gradient(135deg,#1B5E7B,#267DA8)',terracotta:'linear-gradient(135deg,#7A2E1A,#C4762A)',jungle:'linear-gradient(135deg,#1A4A1A,#2D8B20)',lavender:'linear-gradient(135deg,#3A2875,#6B4AC4)',sunset:'linear-gradient(135deg,#8B2020,#D4553A)',midnight:'linear-gradient(135deg,#0F1A2E,#1A3054)',rose:'linear-gradient(135deg,#6B1A3A,#B84075)',desert:'linear-gradient(135deg,#5A3A0A,#C49A1A)'};
+const WHO_LABEL={p1:'Joshua',p2:'Allie',both:'Both'};
+const BUDGET_CATS=['Transport','Accommodation','Food & Drink','Activities','Shopping','Health','Other'];
+const PACKING_CATS=['Clothing','Electronics','Documents','Toiletries','Activities / Sports','Medical','Other'];
+
+/* ===================== STATE ===================== */
+let sb=null,currentUser='p1',currentSession=null;
+let tripId=null,tripMeta=null;
+let state=emptyState();
+let currentPanel='dashboard';
+let leafletMap=null,mapInitialized=false;
+let stTimer=null,notesTimer=null;
+// modal editing state
+let editDayId=null,editItemId=null,editPinId=null,editTaskId=null,editExpId=null;
+let selectedActIcon='🏛',selectedPinIcon='📍';
+
+function emptyState(){
+  return{
+    itinerary:[],
+    notes:'',
+    wishlist:[],
+    tasks:[],
+    budget:{baseCurrency:'GBP',fxRate:1.19,items:[]},
+    packing:[],
+    map:{pins:[],center:null}
+  };
+}
+
+/* ===================== HELPERS ===================== */
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function formatMoney(n,currency){const sym=currency==='EUR'?'€':'£';return sym+(+n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function getDaysTo(meta){
+  if(!meta?.startDate)return null;
+  return Math.ceil((new Date(meta.startDate)-new Date())/864e5);
+}
+function getDuration(meta){
+  if(!meta?.startDate||!meta?.endDate)return null;
+  return Math.ceil((new Date(meta.endDate)-new Date(meta.startDate))/864e5)+1;
+}
+function formatDateRange(meta){
+  if(!meta?.startDate)return'Dates TBD';
+  const opts={day:'numeric',month:'short'};
+  const s=new Date(meta.startDate),e=meta.endDate?new Date(meta.endDate):null;
+  const fmt=d=>d.toLocaleDateString('en-GB',opts);
+  if(!e)return fmt(s);
+  return s.getMonth()===e.getMonth()?`${s.getDate()} \u2013 ${fmt(e)}`:`${fmt(s)} \u2013 ${fmt(e)}`;
+}
+function flash(msg){const el=document.getElementById('status-bar');el.textContent=msg;el.classList.add('show');clearTimeout(stTimer);stTimer=setTimeout(()=>el.classList.remove('show'),2400);}
+function setConn(type,text){const el=document.getElementById('conn-badge');el.className='conn-badge conn-'+type;el.innerHTML=`<div class="conn-dot"></div><span>${text}</span>`;}
+function closeModal(id){document.getElementById(id).style.display='none';}
+function openModal(id){document.getElementById(id).style.display='flex';}
+
+/* ===================== NAV ===================== */
+function switchPanel(name){
+  currentPanel=name;
+  document.querySelectorAll('.panel').forEach(p=>{
+    const isTarget=p.id==='panel-'+name;
+    p.classList.toggle('active',isTarget);
+    p.style.display=isTarget?(name==='map'?'flex':'block'):'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    t.classList.toggle('active',t.dataset.panel===name);
+  });
+  if(name==='map')initMap();
+  if(name==='notes')document.getElementById('notes-area').focus();
+}
+function goHome(){window.location.href='index.html';}
+
+/* ===================== AUTH (same pattern as index.html) ===================== */
+async function waitForSupabase(timeout=8000){
+  const start=Date.now();
+  while(typeof supabase==='undefined'||typeof supabase.createClient!=='function'){
+    if(Date.now()-start>timeout)throw new Error('Supabase failed to load');
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+let _signingInAs=null;
+function showLoginView(){
+  ['auth-password-form','auth-magic-view','auth-sent-view','auth-set-password-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('auth-login-view').style.display='block';
+  document.getElementById('auth-person-picker').style.display='flex';
+  document.getElementById('auth-who-sub').textContent="Who's planning?";
+  document.getElementById('auth-msg').className='auth-msg';
+}
+function showSignInForm(who){
+  _signingInAs=who;
+  const name=who==='p1'?'Joshua':'Allie';
+  document.getElementById('auth-person-picker').style.display='none';
+  document.getElementById('auth-who-sub').textContent=`Welcome back, ${name}`;
+  document.getElementById('auth-form-email').value=who==='p1'?P1_EMAIL:P2_EMAIL;
+  document.getElementById('auth-form-password').value='';
+  const btn=document.getElementById('auth-form-btn');
+  btn.style.cssText=who==='p1'?'background:var(--sea)':'background:var(--teal)';
+  btn.disabled=false;btn.textContent='Sign in';
+  document.getElementById('auth-password-form').style.display='block';
+  document.getElementById('auth-msg').className='auth-msg';
+  setTimeout(()=>document.getElementById('auth-form-password')?.focus(),80);
+}
+function backToPicker(){
+  _signingInAs=null;
+  document.getElementById('auth-person-picker').style.display='flex';
+  document.getElementById('auth-password-form').style.display='none';
+  document.getElementById('auth-who-sub').textContent="Who's planning?";
+  document.getElementById('auth-msg').className='auth-msg';
+}
+async function submitSignIn(){
+  if(!_signingInAs)return;
+  const email=_signingInAs==='p1'?P1_EMAIL:P2_EMAIL;
+  const password=document.getElementById('auth-form-password').value;
+  const msg=document.getElementById('auth-msg');msg.className='auth-msg';
+  if(!password){msg.className='auth-msg error';msg.textContent='Please enter your password.';return;}
+  if(!sb){msg.className='auth-msg error';msg.textContent='Still connecting…';return;}
+  const btn=document.getElementById('auth-form-btn');btn.disabled=true;btn.textContent='Signing in\u2026';
+  try{
+    const{error}=await sb.auth.signInWithPassword({email,password});
+    if(error)throw error;
+  }catch(e){
+    const bad=e?.message?.toLowerCase().includes('invalid')||e?.message?.toLowerCase().includes('credentials');
+    msg.className='auth-msg error';msg.textContent=bad?'Incorrect password.':(e?.message||'Sign in failed.');
+    btn.disabled=false;btn.textContent='Sign in';
+  }
+}
+function showMagicLinkView(){
+  document.getElementById('auth-login-view').style.display='none';
+  document.getElementById('auth-magic-view').style.display='block';
+  document.getElementById('auth-magic-btn').disabled=false;
+  document.getElementById('auth-magic-btn').textContent='Send magic link';
+  document.getElementById('auth-magic-msg').className='auth-msg';
+}
+async function sendMagicLink(){
+  const email=document.getElementById('auth-magic-email').value.trim();
+  const btn=document.getElementById('auth-magic-btn');
+  const msg=document.getElementById('auth-magic-msg');msg.className='auth-msg';
+  if(!email||!email.includes('@')){msg.className='auth-msg error';msg.textContent='Please enter a valid email.';return;}
+  if(email.toLowerCase()!==P1_EMAIL.toLowerCase()&&email.toLowerCase()!==P2_EMAIL.toLowerCase()){
+    msg.className='auth-msg error';msg.textContent="That email isn't registered.";return;
+  }
+  btn.disabled=true;btn.textContent='Sending\u2026';
+  try{
+    const{error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href,shouldCreateUser:true}});
+    if(error)throw error;
+    document.getElementById('auth-email-shown').textContent=email;
+    document.getElementById('auth-magic-view').style.display='none';
+    document.getElementById('auth-sent-view').style.display='block';
+  }catch(e){
+    msg.className='auth-msg error';msg.textContent=e?.message||'Something went wrong.';
+    btn.disabled=false;btn.textContent='Send magic link';
+  }
+}
+function showSetPasswordView(session,isReset=false){
+  if(session)currentSession=session;
+  document.getElementById('auth-set-pwd-sub').textContent=isReset?'Choose a new password':'Set a password for future logins';
+  document.getElementById('auth-set-pwd-email').value=session?.user?.email||'';
+  ['auth-login-view','auth-magic-view','auth-sent-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('auth-set-password-view').style.display='block';
+  document.getElementById('auth-screen').style.display='flex';
+}
+async function setPassword(){
+  const pwd=document.getElementById('auth-new-password').value;
+  const confirm=document.getElementById('auth-confirm-password').value;
+  const btn=document.getElementById('auth-set-pwd-btn');
+  const msg=document.getElementById('auth-set-pwd-msg');msg.className='auth-msg';
+  if(!pwd||pwd.length<6){msg.className='auth-msg error';msg.textContent='Password must be at least 6 characters.';return;}
+  if(pwd!==confirm){msg.className='auth-msg error';msg.textContent="Passwords don't match.";return;}
+  btn.disabled=true;btn.textContent='Saving\u2026';
+  try{
+    const{error}=await sb.auth.updateUser({password:pwd});
+    if(error)throw error;
+    msg.className='auth-msg success';msg.textContent='Password set!';
+    setTimeout(completeSignIn,800);
+  }catch(e){
+    msg.className='auth-msg error';msg.textContent=e?.message||'Could not set password.';
+    btn.disabled=false;btn.textContent='Set password & continue';
+  }
+}
+function skipSetPassword(){completeSignIn();}
+async function signOut(){await sb?.auth.signOut();window.location.reload();}
+function resolveUser(email){return email?.toLowerCase()===P2_EMAIL.toLowerCase()?'p2':'p1';}
+
+/* ===================== INIT ===================== */
+async function init(){
+  tripId=new URLSearchParams(window.location.search).get('id');
+  if(!tripId){document.title='Planner';return;}
+  try{await waitForSupabase();}
+  catch(e){document.getElementById('auth-msg').className='auth-msg error';document.getElementById('auth-msg').textContent='Could not load auth library.';return;}
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){
+    if(window.location.hash.includes('type=recovery'))showSetPasswordView(session,true);
+    else await onSignedIn(session);
+  }else{
+    document.getElementById('auth-screen').style.display='flex';
+    const{data:{subscription}}=sb.auth.onAuthStateChange(async(event,newSession)=>{
+      if(event==='PASSWORD_RECOVERY'&&newSession)showSetPasswordView(newSession,true);
+      else if(event==='SIGNED_IN'&&newSession)await onSignedIn(newSession);
+    });
+    window._authSub=subscription;
+  }
+}
+async function onSignedIn(session){
+  currentSession=session;
+  const needsPassword=session?.user?.user_metadata?.has_password!==true&&session?.user?.app_metadata?.provider==='email';
+  if(needsPassword){showSetPasswordView(session);return;}
+  await completeSignIn();
+}
+async function completeSignIn(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session)return;
+  currentSession=session;
+  if(session.user.user_metadata?.has_password!==true)await sb.auth.updateUser({data:{has_password:true}});
+  currentUser=resolveUser(session.user.email);
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app-nav').style.display='block';
+  setConn('wait','Connecting\u2026');
+  try{
+    await loadTripMeta();
+    await loadPlannerState();
+    setConn('ok','Live & synced');
+    subscribeToChanges();
+  }catch(e){
+    console.error(e);setConn('err','Offline mode');loadLocal();
+  }
+  updateHeader();
+  renderAll();
+  if(window._authSub){window._authSub.unsubscribe();window._authSub=null;}
+  sb.auth.onAuthStateChange((event,s)=>{
+    if(event==='SIGNED_OUT')signOut();
+    if(event==='TOKEN_REFRESHED'&&s)currentSession=s;
+  });
+}
+
+/* ===================== DATA ===================== */
+async function loadTripMeta(){
+  const{data,error}=await sb.from('planner_state').select('state').eq('trip_id',TRIPS_KEY).single();
+  if(error&&error.code!=='PGRST116')throw error;
+  const trips=data?.state?.trips||[];
+  tripMeta=trips.find(t=>t.id===tripId)||{id:tripId,name:'Holiday Planner',emoji:'\u2708\ufe0f',theme:'mediterranean',destination:'',startDate:null,endDate:null,activities:[]};
+}
+async function loadPlannerState(){
+  const{data,error}=await sb.from('planner_state').select('state').eq('trip_id',tripId).single();
+  if(error&&error.code==='PGRST116'){
+    state=emptyState();
+    state.itinerary=generateItinerary(tripMeta);
+    await sb.from('planner_state').insert({trip_id:tripId,state});
+  }else if(error){throw error;}
+  else{state=mergeState(data.state);}
+  saveLocal();
+}
+function mergeState(saved){
+  const base=emptyState();
+  if(!saved)return base;
+  return{...base,...saved,budget:{...base.budget,...(saved.budget||{})},map:{...base.map,...(saved.map||{})}};
+}
+async function persist(){
+  if(!sb||!currentSession)return;
+  try{await sb.from('planner_state').upsert({trip_id:tripId,state});flash('Saved \u2713');}
+  catch(e){flash('Save failed');}
+}
+function saveLocal(){try{localStorage.setItem('planner__'+tripId,JSON.stringify(state));}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem('planner__'+tripId);if(r)state=mergeState(JSON.parse(r));}catch(e){}}
+function subscribeToChanges(){
+  sb.channel('planner-sync-'+tripId)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'planner_state',filter:`trip_id=eq.${tripId}`},p=>{
+      state=mergeState(p.new.state);saveLocal();renderAll();flash('Updated by partner \u2713');
+    }).subscribe();
+}
+
+/* ===================== ITINERARY GENERATION ===================== */
+function generateItinerary(meta){
+  if(!meta?.startDate)return[];
+  const days=[];
+  const start=new Date(meta.startDate);
+  const end=meta.endDate?new Date(meta.endDate):start;
+  const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  for(let d=new Date(start),i=1;d<=end;d.setDate(d.getDate()+1),i++){
+    const dc=new Date(d);
+    days.push({
+      id:'day-'+i,dayNum:i,
+      date:dc.toISOString().slice(0,10),
+      label:`Day ${i} \u00b7 ${DAY_NAMES[dc.getDay()]} ${dc.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`,
+      items:[]
+    });
+  }
+  return days;
+}
+function addFreeDay(){
+  const n=(state.itinerary.length||0)+1;
+  state.itinerary.push({id:'day-free-'+genId(),dayNum:n,date:'',label:`Day ${n}`,items:[]});
+  saveLocal();renderItinerary();persist();
+}
+
+/* ===================== HEADER ===================== */
+function updateHeader(){
+  if(!tripMeta)return;
+  document.title=tripMeta.name||'Planner';
+  document.getElementById('header-emoji').textContent=tripMeta.emoji||'\u2708\ufe0f';
+  document.getElementById('header-trip-name').textContent=tripMeta.name||'Holiday Planner';
+}
+
+/* ===================== RENDER ALL ===================== */
+function renderAll(){
+  renderDashboard();
+  renderItinerary();
+  renderNotes();
+  renderWishlist();
+  renderTasks();
+  renderBudget();
+  renderPacking();
+  if(mapInitialized)renderMapPins();
+}
+
+/* ===================== DASHBOARD ===================== */
+function renderDashboard(){
+  if(!tripMeta)return;
+  const panel=document.getElementById('panel-dashboard');
+  const theme=COLOR_THEMES[tripMeta.theme]||COLOR_THEMES.mediterranean;
+  const daysTo=getDaysTo(tripMeta);
+  const duration=getDuration(tripMeta);
+  const status=!tripMeta.startDate?'planning':daysTo>0?'upcoming':daysTo<=0&&(duration===null||Math.abs(daysTo)<(duration||1))?'active':'completed';
+  let countdownHtml='';
+  if(status==='upcoming'&&daysTo>0)countdownHtml=`<div class="dash-countdown"><div class="dash-count-num">${daysTo}</div><div class="dash-count-lbl">days to go</div></div>`;
+  else if(status==='active')countdownHtml=`<div class="dash-countdown"><div class="dash-count-num">\u2708</div><div class="dash-count-lbl">Underway</div></div>`;
+  const acts=(tripMeta.activities||[]).slice(0,6).map(a=>`<span class="dash-pill">${a}</span>`).join('');
+  // Quick stats
+  const packTotal=state.packing.length,packDone=state.packing.filter(p=>p.packed).length;
+  const taskTotal=state.tasks.length,taskDone=state.tasks.filter(t=>t.done).length;
+  const budgetTotal=state.budget.items.reduce((s,i)=>s+(+i.amount||0),0);
+  const wishTotal=state.wishlist.length;
+  panel.innerHTML=`
+    <div class="dash-hero" style="background:${theme}" onclick="">
+      <div class="dash-bg-emoji">${tripMeta.emoji||'\u2708\ufe0f'}</div>
+      <div style="position:relative;z-index:1;max-width:calc(100% - 160px)">
+        <div class="dash-label">${status==='active'?'Currently away':status==='upcoming'?'Upcoming trip':'Holiday planner'}</div>
+        <div class="dash-name">${esc(tripMeta.name)}</div>
+        <div class="dash-meta">${tripMeta.destination?'\uD83D\uDCCD '+esc(tripMeta.destination):''}${tripMeta.startDate?' \u00b7 '+formatDateRange(tripMeta):''}${duration?' \u00b7 '+duration+' days':''}</div>
+        ${acts?`<div class="dash-pills">${acts}</div>`:''}
+      </div>
+      ${countdownHtml}
+    </div>
+    <div class="stats-row">
+      <div class="stat-card" onclick="switchPanel('itinerary')">
+        <span class="stat-icon">\uD83D\uDCC5</span>
+        <div class="stat-value">${state.itinerary.reduce((s,d)=>s+d.items.length,0)}</div>
+        <div class="stat-label">Activities planned</div>
+      </div>
+      <div class="stat-card" onclick="switchPanel('tasks')">
+        <span class="stat-icon">\u2705</span>
+        <div class="stat-value">${taskDone}/${taskTotal}</div>
+        <div class="stat-label">Tasks done</div>
+      </div>
+      <div class="stat-card" onclick="switchPanel('budget')">
+        <span class="stat-icon">\uD83D\uDCB0</span>
+        <div class="stat-value">\u00a3${budgetTotal.toLocaleString('en-GB',{maximumFractionDigits:0})}</div>
+        <div class="stat-label">Budget tracked</div>
+      </div>
+      <div class="stat-card" onclick="switchPanel('packing')">
+        <span class="stat-icon">\uD83E\uDDF3</span>
+        <div class="stat-value">${packDone}/${packTotal}</div>
+        <div class="stat-label">Items packed</div>
+      </div>
+      <div class="stat-card" onclick="switchPanel('wishlist')">
+        <span class="stat-icon">\u2B50</span>
+        <div class="stat-value">${wishTotal}</div>
+        <div class="stat-label">Wishlist items</div>
+      </div>
+    </div>`;
+}
+
+/* ===================== MAP ===================== */
+function initMap(){
+  if(mapInitialized)return;
+  mapInitialized=true;
+  const center=state.map?.center||[39.624,19.922];
+  leafletMap=L.map('leaflet-map').setView(center,12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'\u00a9 OpenStreetMap contributors',maxZoom:18}).addTo(leafletMap);
+  leafletMap.on('click',function(e){
+    document.getElementById('pin-lat').value=e.latlng.lat.toFixed(6);
+    document.getElementById('pin-lng').value=e.latlng.lng.toFixed(6);
+    openPinModal();
+  });
+  renderMapPins();
+  // Geocode destination if no center saved
+  if(!state.map?.center&&tripMeta?.destination){geocodeDestination(tripMeta.destination);}
+}
+async function geocodeDestination(dest){
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(dest)}&format=json&limit=1`);
+    const d=await r.json();
+    if(d&&d.length>0){
+      const lat=+d[0].lat,lng=+d[0].lon;
+      leafletMap.setView([lat,lng],12);
+      state.map.center=[lat,lng];
+      saveLocal();persist();
+    }
+  }catch(e){console.warn('Geocoding failed:',e);}
+}
+let mapMarkers={};
+function renderMapPins(){
+  // Remove old markers
+  Object.values(mapMarkers).forEach(m=>m.remove());
+  mapMarkers={};
+  document.getElementById('pin-list').innerHTML='';
+  if(!state.map?.pins?.length){
+    document.getElementById('pin-list').innerHTML='<div style="padding:1rem;font-size:.8rem;color:var(--ink3);text-align:center">Click the map to save a place</div>';
+    return;
+  }
+  state.map.pins.forEach(pin=>{
+    const icon=L.divIcon({html:`<div style="font-size:1.4rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))">${pin.icon||'\uD83D\uDCCD'}</div>`,className:'',iconAnchor:[12,12]});
+    const marker=L.marker([pin.lat,pin.lng],{icon}).addTo(leafletMap);
+    marker.bindPopup(`<strong>${esc(pin.title)}</strong>${pin.note?`<br><span style="font-size:.8rem">${esc(pin.note)}</span>`:''}`);
+    marker.on('click',()=>marker.openPopup());
+    mapMarkers[pin.id]=marker;
+    const li=document.createElement('div');li.className='pin-item';
+    li.innerHTML=`<span class="pin-icon">${pin.icon||'\uD83D\uDCCD'}</span><div style="flex:1;min-width:0"><div class="pin-name">${esc(pin.title)}</div>${pin.note?`<div class="pin-note">${esc(pin.note)}</div>`:''}</div><button class="icon-btn" onclick="event.stopPropagation();openPinModal('${pin.id}')">&#9998;</button>`;
+    li.onclick=()=>leafletMap.flyTo([pin.lat,pin.lng],14);
+    document.getElementById('pin-list').appendChild(li);
+  });
+}
+function openPinModal(id){
+  editPinId=id||null;
+  const pin=id?state.map.pins.find(p=>p.id===id):null;
+  document.getElementById('pin-modal-title').textContent=pin?'Edit place':'Save a place';
+  document.getElementById('pin-name').value=pin?.title||'';
+  document.getElementById('pin-note').value=pin?.note||'';
+  document.getElementById('pin-lat').value=pin?.lat||'';
+  document.getElementById('pin-lng').value=pin?.lng||'';
+  document.getElementById('pin-delete-btn').style.display=pin?'block':'none';
+  selectedPinIcon=pin?.icon||'\uD83D\uDCCD';
+  buildIconGrid('pin-icon-grid',PIN_ICONS,selectedPinIcon,'selectedPinIcon');
+  openModal('pin-modal');
+  setTimeout(()=>document.getElementById('pin-name').focus(),60);
+}
+function savePin(){
+  const title=document.getElementById('pin-name').value.trim();
+  const lat=+document.getElementById('pin-lat').value;
+  const lng=+document.getElementById('pin-lng').value;
+  if(!title){flash('Please enter a place name');return;}
+  if(!lat||!lng){flash('Please enter coordinates');return;}
+  const pin={id:editPinId||genId(),title,note:document.getElementById('pin-note').value.trim(),lat,lng,icon:selectedPinIcon};
+  if(editPinId){const i=state.map.pins.findIndex(p=>p.id===editPinId);if(i>-1)state.map.pins[i]=pin;}
+  else state.map.pins.push(pin);
+  closeModal('pin-modal');saveLocal();renderMapPins();persist();
+}
+function deletePin(){
+  state.map.pins=state.map.pins.filter(p=>p.id!==editPinId);
+  closeModal('pin-modal');saveLocal();renderMapPins();persist();
+}
+
+/* ===================== ITINERARY ===================== */
+function renderItinerary(){
+  const days=state.itinerary;
+  const wrap=document.getElementById('itin-days');
+  const totalActs=days.reduce((s,d)=>s+d.items.length,0);
+  document.getElementById('itin-sub').textContent=`${days.length} day${days.length!==1?'s':''} \u00b7 ${totalActs} activities`;
+  if(!days.length){
+    wrap.innerHTML=`<div class="empty-state"><span class="empty-state-icon">\uD83D\uDCC5</span><p>No itinerary yet. Add days to start planning.</p><button class="btn btn-primary btn-sm" onclick="addFreeDay()">+ Add a day</button></div>`;
+    return;
+  }
+  wrap.innerHTML='';
+  days.forEach(day=>{
+    const card=document.createElement('div');card.className='day-card';
+    const items=day.items.map(item=>`
+      <div class="day-item">
+        <span class="item-time">${item.time||''}</span>
+        <span class="item-icon">${item.icon||'\uD83C\uDF05'}</span>
+        <div style="flex:1">
+          <div class="item-text">${esc(item.text)}</div>
+          ${item.notes?`<div class="item-notes">${esc(item.notes)}</div>`:''}
+        </div>
+        <div class="item-actions">
+          <button class="icon-btn" onclick="openActivityModal('${day.id}','${item.id}')">&#9998;</button>
+          <button class="icon-btn" onclick="removeActivity('${day.id}','${item.id}')">&#10005;</button>
+        </div>
+      </div>`).join('');
+    card.innerHTML=`
+      <div class="day-hdr">
+        <div><div class="day-title">${esc(day.label)}</div>${day.date?`<div class="day-date">${new Date(day.date).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div>`:''}</div>
+        <button class="btn btn-sm btn-primary" onclick="openActivityModal('${day.id}')">+ Add</button>
+      </div>
+      <div class="day-items">${items||`<div style="padding:.5rem 1.25rem;font-size:.8rem;color:var(--ink3)">No activities yet</div>`}</div>`;
+    wrap.appendChild(card);
+  });
+}
+function openActivityModal(dayId,itemId){
+  editDayId=dayId;editItemId=itemId||null;
+  const day=state.itinerary.find(d=>d.id===dayId);
+  const item=itemId?day?.items.find(i=>i.id===itemId):null;
+  document.getElementById('act-modal-title').textContent=item?`Edit \u2014 ${day?.label}`:`Add activity \u2014 ${day?.label}`;
+  document.getElementById('act-time').value=item?.time||'';
+  document.getElementById('act-text').value=item?.text||'';
+  document.getElementById('act-notes').value=item?.notes||'';
+  document.getElementById('act-delete-btn').style.display=item?'block':'none';
+  selectedActIcon=item?.icon||'\uD83C\uDFDB';
+  buildIconGrid('act-icon-grid',ACTIVITY_ICONS,selectedActIcon,'selectedActIcon');
+  openModal('activity-modal');
+  setTimeout(()=>document.getElementById('act-text').focus(),60);
+}
+function saveActivity(){
+  const text=document.getElementById('act-text').value.trim();
+  if(!text){flash('Please enter an activity');return;}
+  const item={id:editItemId||genId(),time:document.getElementById('act-time').value,icon:selectedActIcon,text,notes:document.getElementById('act-notes').value.trim()};
+  const day=state.itinerary.find(d=>d.id===editDayId);if(!day)return;
+  if(editItemId){const i=day.items.findIndex(x=>x.id===editItemId);if(i>-1)day.items[i]=item;}
+  else day.items.push(item);
+  closeModal('activity-modal');saveLocal();renderItinerary();persist();
+}
+function deleteActivity(){
+  const day=state.itinerary.find(d=>d.id===editDayId);if(!day)return;
+  day.items=day.items.filter(i=>i.id!==editItemId);
+  closeModal('activity-modal');saveLocal();renderItinerary();persist();
+}
+function removeActivity(dayId,itemId){
+  const day=state.itinerary.find(d=>d.id===dayId);if(!day)return;
+  day.items=day.items.filter(i=>i.id!==itemId);
+  saveLocal();renderItinerary();persist();
+}
+
+/* ===================== NOTES ===================== */
+function renderNotes(){
+  document.getElementById('notes-area').value=state.notes||'';
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('notes-area').addEventListener('input',function(){
+    state.notes=this.value;
+    saveLocal();
+    const lbl=document.getElementById('notes-saved-lbl');
+    lbl.textContent='Saving\u2026';
+    clearTimeout(notesTimer);
+    notesTimer=setTimeout(async()=>{await persist();lbl.textContent='Saved \u2713';},1200);
+  });
+});
+
+/* ===================== WISHLIST ===================== */
+function renderWishlist(){
+  const list=document.getElementById('wish-list');
+  if(!state.wishlist.length){
+    list.innerHTML='<div class="empty-state"><span class="empty-state-icon">\u2B50</span><p>Add things you both want to do</p></div>';
+    return;
+  }
+  const sorted=[...state.wishlist].sort((a,b)=>{
+    const va=(a.votes?.p1||0)+(a.votes?.p2||0);
+    const vb=(b.votes?.p1||0)+(b.votes?.p2||0);
+    return vb-va;
+  });
+  list.innerHTML=sorted.map(item=>{
+    const vp1=item.votes?.p1||0,vp2=item.votes?.p2||0;
+    const myVote=currentUser==='p1'?vp1:vp2;
+    return`<div class="wish-item">
+      <div class="wish-text">${esc(item.text)}</div>
+      <div class="wish-votes">
+        <button class="vote-btn${myVote>0?' voted':''}" onclick="voteWish('${item.id}',1)">\uD83D\uDC4D ${vp1+vp2}</button>
+        <button class="icon-btn" onclick="removeWish('${item.id}')">&#10005;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openWishModal(){document.getElementById('wish-text').value='';openModal('wish-modal');setTimeout(()=>document.getElementById('wish-text').focus(),60);}
+function saveWish(){
+  const text=document.getElementById('wish-text').value.trim();
+  if(!text){flash('Please enter something');return;}
+  state.wishlist.push({id:genId(),text,votes:{p1:0,p2:0},added:new Date().toISOString(),addedBy:currentUser});
+  closeModal('wish-modal');saveLocal();renderWishlist();persist();
+}
+function voteWish(id,v){
+  const item=state.wishlist.find(w=>w.id===id);if(!item)return;
+  if(!item.votes)item.votes={p1:0,p2:0};
+  const cur=item.votes[currentUser]||0;
+  item.votes[currentUser]=cur>0?0:v;
+  saveLocal();renderWishlist();persist();
+}
+function removeWish(id){state.wishlist=state.wishlist.filter(w=>w.id!==id);saveLocal();renderWishlist();persist();}
+
+/* ===================== TASKS ===================== */
+function renderTasks(){
+  const list=document.getElementById('tasks-list');
+  const done=state.tasks.filter(t=>t.done).length;
+  document.getElementById('tasks-sub').textContent=`${done}/${state.tasks.length} completed`;
+  if(!state.tasks.length){
+    list.innerHTML='<div class="empty-state"><span class="empty-state-icon">\u2705</span><p>No tasks yet \u2014 add things to book or sort before the trip</p></div>';
+    return;
+  }
+  const sorted=[...state.tasks].sort((a,b)=>a.done===b.done?0:a.done?1:-1);
+  list.innerHTML=sorted.map(t=>`
+    <div class="task-item${t.done?' done':''}">
+      <div class="task-check${t.done?' checked':''}" onclick="toggleTask('${t.id}')">${t.done?'\u2713':''}</div>
+      <span class="task-text${t.done?' done-txt':''}">${esc(t.text)}</span>
+      <span class="task-who">${WHO_LABEL[t.assignee]||t.assignee}</span>
+      <button class="icon-btn" onclick="removeTask('${t.id}')">&#10005;</button>
+    </div>`).join('');
+}
+function openTaskModal(id){
+  editTaskId=id||null;
+  const task=id?state.tasks.find(t=>t.id===id):null;
+  document.getElementById('task-modal-title').textContent=task?'Edit task':'Add task';
+  document.getElementById('task-text').value=task?.text||'';
+  document.getElementById('task-who').value=task?.assignee||'p1';
+  document.getElementById('task-delete-btn').style.display=task?'block':'none';
+  openModal('task-modal');setTimeout(()=>document.getElementById('task-text').focus(),60);
+}
+function saveTask(){
+  const text=document.getElementById('task-text').value.trim();
+  if(!text){flash('Please enter a task');return;}
+  const task={id:editTaskId||genId(),text,done:false,assignee:document.getElementById('task-who').value,created:new Date().toISOString()};
+  if(editTaskId){const i=state.tasks.findIndex(t=>t.id===editTaskId);if(i>-1)state.tasks[i]={...state.tasks[i],...task};}
+  else state.tasks.push(task);
+  closeModal('task-modal');saveLocal();renderTasks();persist();
+}
+function toggleTask(id){
+  const t=state.tasks.find(t=>t.id===id);if(!t)return;t.done=!t.done;
+  saveLocal();renderTasks();persist();
+}
+function deleteTask(){state.tasks=state.tasks.filter(t=>t.id!==editTaskId);closeModal('task-modal');saveLocal();renderTasks();persist();}
+function removeTask(id){state.tasks=state.tasks.filter(t=>t.id!==id);saveLocal();renderTasks();persist();}
+
+/* ===================== BUDGET ===================== */
+function renderBudget(){
+  const items=state.budget.items||[];
+  const rate=+(state.budget.fxRate)||1.19;
+  const total=items.reduce((s,i)=>s+(+i.amount||0),0);
+  const totalEur=total*rate;
+  document.getElementById('budget-summary-block').innerHTML=`
+    <div class="budget-summary">
+      <div>
+        <div class="budget-total-val">\u00a3${total.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+        <div class="budget-total-sub">\u20ac${totalEur.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})} at current rate</div>
+      </div>
+      <div class="budget-rate">
+        GBP \u2192 EUR:
+        <input type="number" step="0.01" value="${rate}" onchange="updateFxRate(this.value)" style="width:58px">
+      </div>
+    </div>`;
+  const tbody=document.getElementById('budget-tbody');
+  if(!items.length){tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state" style="padding:1.5rem"><span class="empty-state-icon">\uD83D\uDCB0</span><p>No expenses tracked yet</p></div></td></tr>`;return;}
+  tbody.innerHTML=items.map(item=>`
+    <tr>
+      <td>${esc(item.desc)}</td>
+      <td><span class="cat-pill">${esc(item.category)}</span></td>
+      <td><strong>\u00a3${(+item.amount||0).toLocaleString('en-GB',{minimumFractionDigits:2})}</strong><br><span style="font-size:.7rem;color:var(--ink3)">\u20ac${((+item.amount||0)*rate).toLocaleString('en-GB',{minimumFractionDigits:2})}</span></td>
+      <td><span class="task-who">${WHO_LABEL[item.who]||item.who}</span></td>
+      <td><button class="icon-btn" onclick="openExpenseModal('${item.id}')">&#9998;</button></td>
+    </tr>`).join('')+`<tr class="budget-total-row"><td colspan="2">Total</td><td><strong>\u00a3${total.toLocaleString('en-GB',{minimumFractionDigits:2})}</strong></td><td colspan="2"></td></tr>`;
+}
+function updateFxRate(v){state.budget.fxRate=+v||1.19;saveLocal();renderBudget();persist();}
+function openExpenseModal(id){
+  editExpId=id||null;
+  const exp=id?state.budget.items.find(e=>e.id===id):null;
+  document.getElementById('exp-modal-title').textContent=exp?'Edit expense':'Add expense';
+  document.getElementById('exp-desc').value=exp?.desc||'';
+  document.getElementById('exp-amount').value=exp?.amount||'';
+  document.getElementById('exp-cat').value=exp?.category||'Other';
+  document.getElementById('exp-who').value=exp?.who||'both';
+  document.getElementById('exp-delete-btn').style.display=exp?'block':'none';
+  openModal('expense-modal');setTimeout(()=>document.getElementById('exp-desc').focus(),60);
+}
+function saveExpense(){
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amount=+document.getElementById('exp-amount').value;
+  if(!desc){flash('Please enter a description');return;}
+  if(isNaN(amount)||amount<0){flash('Please enter a valid amount');return;}
+  const exp={id:editExpId||genId(),desc,amount,category:document.getElementById('exp-cat').value,who:document.getElementById('exp-who').value,date:new Date().toISOString().slice(0,10)};
+  if(!state.budget.items)state.budget.items=[];
+  if(editExpId){const i=state.budget.items.findIndex(e=>e.id===editExpId);if(i>-1)state.budget.items[i]=exp;}
+  else state.budget.items.push(exp);
+  closeModal('expense-modal');saveLocal();renderBudget();persist();
+}
+function deleteExpense(){state.budget.items=state.budget.items.filter(e=>e.id!==editExpId);closeModal('expense-modal');saveLocal();renderBudget();persist();}
+
+/* ===================== PACKING ===================== */
+function renderPacking(){
+  const items=state.packing||[];
+  const total=items.length,done=items.filter(i=>i.packed).length;
+  const pct=total?Math.round((done/total)*100):0;
+  document.getElementById('pack-progress-block').innerHTML=`
+    <div class="pack-progress">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <strong style="font-size:.9rem">${done} of ${total} packed</strong>
+        <span style="font-size:.85rem;color:var(--teal);font-weight:600">${pct}%</span>
+      </div>
+      <div class="pack-bar-track"><div class="pack-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  const listEl=document.getElementById('packing-list');
+  if(!items.length){
+    listEl.innerHTML='<div class="empty-state"><span class="empty-state-icon">\uD83E\uDDF3</span><p>Add items to start building your packing list</p></div>';
+    return;
+  }
+  // Group by category
+  const groups={};
+  PACKING_CATS.forEach(c=>{groups[c]=[];});
+  groups['Other']=groups['Other']||[];
+  items.forEach(item=>{
+    const cat=item.category&&groups[item.category]?item.category:'Other';
+    groups[cat].push(item);
+  });
+  listEl.innerHTML='';
+  Object.entries(groups).forEach(([cat,catItems])=>{
+    if(!catItems.length)return;
+    const sec=document.createElement('div');sec.className='pack-cat-section';
+    sec.innerHTML=`<div class="pack-cat-hdr"><span>${cat}</span><span style="color:var(--ink3)">${catItems.filter(i=>i.packed).length}/${catItems.length}</span></div>`+
+      catItems.map(item=>`
+        <div class="pack-item">
+          <div class="pack-check${item.packed?' packed':''}" onclick="togglePack('${item.id}')">${item.packed?'\u2713':''}</div>
+          <span class="pack-text" style="${item.packed?'text-decoration:line-through;color:var(--ink3)':''}">${esc(item.text)}</span>
+          <span class="pack-who">${WHO_LABEL[item.who]||item.who}</span>
+          <button class="icon-btn" onclick="removePack('${item.id}')">&#10005;</button>
+        </div>`).join('');
+    listEl.appendChild(sec);
+  });
+}
+function openPackModal(){document.getElementById('pack-text').value='';openModal('pack-modal');setTimeout(()=>document.getElementById('pack-text').focus(),60);}
+function savePack(){
+  const text=document.getElementById('pack-text').value.trim();
+  if(!text){flash('Please enter an item');return;}
+  state.packing.push({id:genId(),text,category:document.getElementById('pack-cat').value,who:document.getElementById('pack-who').value,packed:false});
+  closeModal('pack-modal');saveLocal();renderPacking();persist();
+}
+function togglePack(id){
+  const item=state.packing.find(p=>p.id===id);if(!item)return;item.packed=!item.packed;
+  saveLocal();renderPacking();persist();
+}
+function removePack(id){state.packing=state.packing.filter(p=>p.id!==id);saveLocal();renderPacking();persist();}
+
+/* ===================== ICON PICKER ===================== */
+function buildIconGrid(containerId,icons,selected,varName){
+  const grid=document.getElementById(containerId);
+  grid.innerHTML=icons.map(icon=>`<button class="icon-pick-btn${icon===selected?' selected':''}" onclick="selectIcon('${containerId}','${icon}','${varName}')">${icon}</button>`).join('');
+}
+function selectIcon(containerId,icon,varName){
+  if(varName==='selectedActIcon')selectedActIcon=icon;
+  if(varName==='selectedPinIcon')selectedPinIcon=icon;
+  document.querySelectorAll(`#${containerId} .icon-pick-btn`).forEach(b=>b.classList.toggle('selected',b.textContent===icon));
+}
+
+/* ===================== GO ===================== */
+init();
+</script>
+</body>
+</html>
