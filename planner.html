@@ -2605,7 +2605,7 @@ async function onDocFilePicked(ev){
 function renderDocs(){
   var g=document.getElementById('docs-grid'); if(!g)return;
   var docs=appState.docs||[];
-  if(!docs.length){g.innerHTML='<div class="bk-empty">Upload passports, insurance or e-tickets.</div>';return;}
+  if(!docs.length){g.innerHTML='<div class="bk-empty">No documents yet — Upload passports, insurance or e-tickets.</div>';return;}
   g.innerHTML=docs.map(function(d){
     return '<div class="doc-chip"><span class="doc-ic">'+_fileIcon(d.name)+'</span><div class="doc-meta"><div class="doc-name" title="'+esc(d.name)+'">'+esc(d.name)+'</div><div class="doc-sub">'+_fmtSize(d.size)+'</div></div><div class="doc-acts"><button class="doc-btn" title="Open" onclick="sbOpen(\''+d.path+'\')">↗</button><button class="doc-btn doc-del" title="Delete" onclick="deleteDoc(\''+d.id+'\')">✕</button></div></div>';
   }).join('');
