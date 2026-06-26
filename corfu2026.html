@@ -2238,7 +2238,7 @@ a.rt-content,.rt-content a{color:var(--brand)}
       <div id="bk-setup"></div>
       <div class="card">
         <div class="bk-head"><div class="card-title">📎 Travel documents</div><button class="btn btn-sm btn-primary" onclick="pickDoc()">＋ Upload</button></div>
-        <p class="bk-note">Passports, insurance, e-tickets — anything you want handy. Stored privately in your trip's own storage.</p>
+        <p class="bk-note">Passports, e-tickets, booking docs — anything we want handy. Stored privately in the trip's own storage.</p>
         <div id="docs-grid" class="docs-grid"></div>
       </div>
       <div class="card" style="margin-top:1rem">
@@ -4883,7 +4883,7 @@ async function onDocFilePicked(ev){
 function renderDocs(){
   var g=document.getElementById('docs-grid'); if(!g)return;
   var docs=appState.docs||[];
-  if(!docs.length){g.innerHTML='<div class="bk-empty">No documents yet — upload passports, insurance or e-tickets and they will be here for both of you.</div>';return;}
+  if(!docs.length){g.innerHTML='<div class="bk-empty">Upload passports, insurance or e-tickets.</div>';return;}
   g.innerHTML=docs.map(function(d){
     return '<div class="doc-chip"><span class="doc-ic">'+_fileIcon(d.name)+'</span><div class="doc-meta"><div class="doc-name" title="'+esc(d.name)+'">'+esc(d.name)+'</div><div class="doc-sub">'+_fmtSize(d.size)+'</div></div><div class="doc-acts"><button class="doc-btn" title="Open" onclick="sbOpen(\''+d.path+'\')">↗</button><button class="doc-btn doc-del" title="Delete" onclick="deleteDoc(\''+d.id+'\')">✕</button></div></div>';
   }).join('');
