@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#155E78" id="meta-theme-color">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Holidays">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>My Holidays</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sand:#FEF3E7;--sand2:#F8DEC6;
+  --ink:#34232B;--ink2:#6A4E52;--ink3:#AC8C87;
+  --sea:#0E9C9A;--sea2:#16B6AE;--sea-lt:#D3F1EE;
+  --teal:#129488;--teal-lt:#D3F0EB;
+  --amber:#E0892C;--amber-lt:#FBE8CE;
+  --coral:#E25A4E;--coral-lt:#FBE0DC;
+  --white:#FFFFFF;--border:rgba(52,35,43,0.10);
+  --radius:12px;--radius-lg:18px;
+}
+html{font-size:15px}
+body{font-family:'Hanken Grotesk',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;min-height:100dvh;line-height:1.6}
+#auth-screen{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.auth-card{background:var(--white);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.auth-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:500;margin-bottom:.25rem}
+.auth-logo span{color:var(--sea2)}
+.auth-sub{font-size:.85rem;color:var(--ink3);margin-bottom:2rem}
+.auth-field{margin-bottom:1rem}
+.auth-field label{display:block;font-size:.78rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.auth-field input{width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:.95rem;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--sand);color:var(--ink);outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--sea2)}
+.auth-btn{width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:.9rem;font-weight:500;padding:11px;border-radius:8px;border:none;background:var(--sea);color:var(--white);cursor:pointer;transition:background .15s;margin-top:.25rem}
+.auth-btn:hover{background:var(--sea2)}
+.auth-btn:disabled{background:var(--ink3);cursor:not-allowed}
+.auth-msg{font-size:.82rem;margin-top:.75rem;padding:8px 12px;border-radius:7px;text-align:center;display:none}
+.auth-msg.success{background:var(--teal-lt);color:var(--teal);display:block}
+.auth-msg.error{background:var(--coral-lt);color:var(--coral);display:block}
+.auth-btn-p1{background:var(--sea)!important;margin-bottom:.75rem}
+.auth-btn-p2{background:var(--teal)!important}
+.auth-btn-p1:hover{background:var(--sea2)!important}
+.auth-btn-p2:hover{background:#156658!important}
+.auth-resend{font-size:.8rem;color:var(--sea);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:'Hanken Grotesk',sans-serif}
+.site-header{background:var(--ink);color:var(--white);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.header-logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:500;letter-spacing:.02em}
+.header-logo span{color:var(--sea2)}
+.btn{font-family:'Hanken Grotesk',sans-serif;font-size:.8rem;font-weight:500;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--ink);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--sand);border-color:var(--ink3)}
+.btn-primary{background:var(--sea);color:var(--white);border-color:var(--sea)}
+.btn-primary:hover{background:var(--sea2);border-color:var(--sea2)}
+.btn-danger{background:var(--coral-lt);color:var(--coral);border-color:rgba(184,64,64,.2)}
+.btn-danger:hover{background:var(--coral);color:var(--white)}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Hanken Grotesk',sans-serif;font-size:.8rem;font-weight:500;padding:6px 14px;border-radius:9px;cursor:pointer;transition:all .12s}
+.btn-ghost:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+.conn-badge{font-size:.72rem;padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.conn-dot{width:6px;height:6px;border-radius:50%}
+.conn-ok{background:rgba(26,122,106,.2);color:#1A7A6A}.conn-ok .conn-dot{background:#1A7A6A}
+.conn-err{background:rgba(184,64,64,.2);color:var(--coral)}.conn-err .conn-dot{background:var(--coral)}
+.conn-wait{background:rgba(196,118,42,.2);color:var(--amber)}.conn-wait .conn-dot{background:var(--amber)}
+.next-banner{border-radius:var(--radius-lg);padding:2rem 2.25rem;position:relative;overflow:hidden;color:var(--white);cursor:pointer;transition:filter .2s}
+.next-banner:hover{filter:brightness(1.06)}
+.nb-bg-emoji{position:absolute;right:-1.5rem;top:-1.5rem;font-size:9rem;opacity:.07;pointer-events:none;line-height:1;user-select:none;transform:rotate(-8deg)}
+.nb-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;opacity:.6;margin-bottom:.5rem}
+.nb-name{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;line-height:1.15;margin-bottom:.3rem}
+.nb-meta{font-size:.875rem;opacity:.75;margin-bottom:1rem}
+.nb-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.4rem}
+.nb-pill{background:rgba(255,255,255,.15);color:rgba(255,255,255,.95);font-size:.76rem;padding:4px 12px;border-radius:20px;font-weight:500}
+.nb-countdown{position:absolute;right:2.25rem;top:50%;transform:translateY(-50%);text-align:right;pointer-events:none}
+.nb-num{font-family:'Cormorant Garamond',serif;font-size:5rem;font-weight:700;color:rgba(255,255,255,.95);line-height:1}
+.nb-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;opacity:.55;margin-top:2px}
+.sec-hdr{display:flex;align-items:flex-end;justify-content:space-between;padding:1.75rem 2rem .875rem}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;letter-spacing:-.01em}
+.sec-sub{font-size:.78rem;color:var(--ink3);margin-top:2px}
+.trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;padding:0 2rem 3rem}
+.trip-card{background:var(--white);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05),0 0 0 0.5px rgba(26,26,26,.06);transition:transform .2s,box-shadow .2s;cursor:pointer;display:flex;flex-direction:column;position:relative}
+.trip-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.1),0 0 0 0.5px rgba(26,26,26,.06)}
+.tc-hero{height:160px;position:relative;display:flex;flex-direction:column;padding:1rem 1.25rem}
+.tc-bg-emoji{position:absolute;right:-.75rem;top:-.75rem;font-size:6.5rem;opacity:.08;pointer-events:none;line-height:1;user-select:none;transform:rotate(-6deg)}
+.tc-hero-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1}
+.tc-emoji{font-size:2rem;line-height:1}
+.tc-badges{display:flex;align-items:center;gap:6px}
+.tc-status{font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;transition:opacity .15s}
+.tc-edit{opacity:0;transition:opacity .15s;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:7px;color:var(--white);font-family:'Hanken Grotesk',sans-serif;font-size:.72rem;font-weight:500;padding:3px 9px;cursor:pointer}
+.trip-card:hover .tc-status{opacity:0}
+.trip-card:hover .tc-edit{opacity:1}
+.tc-bottom{margin-top:auto;position:relative;z-index:1}
+.tc-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:var(--white);line-height:1.2}
+.s-upcoming{background:rgba(255,255,255,.2);color:var(--white);border:1px solid rgba(255,255,255,.3)}
+.s-active{background:#1A7A6A;color:var(--white)}
+.s-planning{background:rgba(255,255,255,.14);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.22)}
+.s-completed{background:rgba(0,0,0,.28);color:rgba(255,255,255,.75)}
+.tc-body{padding:1.1rem 1.25rem .75rem;flex:1;display:flex;flex-direction:column;gap:.45rem}
+.tc-dest{font-size:.78rem;color:var(--ink3)}
+.tc-dates{font-size:.9rem;font-weight:500;color:var(--ink);line-height:1.3}
+.tc-desc{font-size:.78rem;color:var(--ink3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}
+.act-pill{font-size:.67rem;padding:2px 8px;border-radius:20px;background:var(--sand);color:var(--ink2);border:1px solid var(--border);font-weight:500;white-space:nowrap}
+.tc-footer{padding:.875rem 1.25rem 1.1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cd-num{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1}
+.cd-lbl{font-size:.66rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem;overflow-y:auto}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;margin-bottom:1.5rem}
+.modal-sec-lbl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:.625rem;display:block}
+.modal-field{margin-bottom:.875rem}
+.modal-field label{display:block;font-size:.75rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:.88rem;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--sand);color:var(--ink);outline:none;transition:border-color .15s}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--sea2)}
+.modal-field textarea{resize:vertical;min-height:60px}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+.emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.emoji-btn{padding:6px 4px;border-radius:8px;border:2px solid transparent;background:var(--sand);font-size:1.3rem;cursor:pointer;text-align:center;transition:all .1s;line-height:1.25;font-family:inherit}
+.emoji-btn:hover{background:var(--sea-lt);border-color:rgba(26,125,168,.3)}
+.emoji-btn.selected{background:var(--sea-lt);border-color:var(--sea);box-shadow:0 0 0 2px rgba(26,94,123,.12)}
+.theme-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.theme-swatch{width:30px;height:30px;border-radius:8px;cursor:pointer;border:2.5px solid transparent;transition:all .15s;flex-shrink:0}
+.theme-swatch.selected{border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,26,.12)}
+.theme-swatch:hover:not(.selected){transform:scale(1.12)}
+.act-chips{display:flex;flex-wrap:wrap;gap:6px}
+.act-chip{font-size:.78rem;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--sand);color:var(--ink2);cursor:pointer;transition:all .12s;font-weight:500;display:inline-flex;align-items:center;gap:5px;font-family:'Hanken Grotesk',sans-serif}
+.act-chip:hover{border-color:var(--sea2);color:var(--sea)}
+.act-chip.selected{background:var(--sea-lt);border-color:var(--sea);color:var(--sea);font-weight:600}
+details summary{font-size:.78rem;color:var(--ink3);cursor:pointer;user-select:none;padding:6px 0;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ "}
+details[open] summary::before{content:"▾ "}
+.mini-modal{background:var(--white);border-radius:var(--radius-lg);padding:1.75rem;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
+.mini-modal p{font-size:.875rem;color:var(--ink);margin-bottom:1.5rem;line-height:1.6}
+.status-bar{position:fixed;bottom:1.25rem;right:1.5rem;background:var(--ink);color:var(--white);padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.status-bar.show{opacity:1}
+.empty-state{grid-column:1/-1;text-align:center;padding:4rem 2rem}
+.empty-state-icon{font-size:3rem;margin-bottom:1rem;opacity:.3;display:block}
+.empty-state h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:.5rem}
+.empty-state p{font-size:.875rem;color:var(--ink3);margin-bottom:1.5rem}
+.empty-state .btn{transition:transform .15s,box-shadow .15s}.empty-state .btn:hover{transform:translateY(-1px)}
+.skeleton{background:linear-gradient(90deg,var(--sand2) 25%,rgba(237,228,204,.45) 50%,var(--sand2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--white);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05),0 0 0 0.5px rgba(26,26,26,.06);display:flex;flex-direction:column;min-height:300px}
+.skel-hero{height:120px}
+.skel-body{padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.6rem;flex:1}
+.skel-line{height:13px;border-radius:6px}
+.skel-pill{height:22px;width:70px;border-radius:20px;display:inline-block}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.trip-card.tc-anim{animation:cardIn .32s ease both}
+@media(max-width:640px){
+  .site-header{padding:0 1rem}
+  .next-banner{padding:1.5rem}
+  .nb-name{font-size:1.5rem}
+  .nb-countdown{display:none}
+  .sec-hdr{padding:1.25rem 1rem .75rem}
+  .trips-grid{padding:0 1rem 2.5rem;grid-template-columns:1fr}
+  .modal-row{grid-template-columns:1fr}
+  input,select,textarea{font-size:16px!important}
+}
+
+/* ═══════════ POLISH LAYER (v2) — elevation, motion, depth ═══════════ */
+:root{
+  --e1:0 1px 2px rgba(26,26,26,.04),0 1px 3px rgba(26,26,26,.05);
+  --e2:0 2px 4px rgba(26,26,26,.04),0 4px 12px rgba(26,26,26,.07);
+  --e3:0 8px 16px rgba(26,26,26,.06),0 16px 40px rgba(26,26,26,.12);
+  --e-sea:0 4px 14px rgba(27,94,123,.22);
+  --ease:cubic-bezier(.4,0,.2,1);--ease-spring:cubic-bezier(.34,1.4,.5,1);--dur:.22s;
+  --ring:0 0 0 3px rgba(38,125,168,.18);
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
+*{scrollbar-width:thin;scrollbar-color:var(--sand2) transparent}
+body::-webkit-scrollbar,.modal::-webkit-scrollbar{width:9px;height:9px}
+body::-webkit-scrollbar-thumb,.modal::-webkit-scrollbar-thumb{background:var(--sand2);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+body{background:radial-gradient(1200px 600px at 100% -10%,rgba(38,125,168,.05),transparent 55%),radial-gradient(900px 500px at -10% 110%,rgba(196,118,42,.05),transparent 50%),var(--sand)}
+.site-header{box-shadow:0 2px 16px rgba(0,0,0,.18)}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.next-banner{box-shadow:var(--e2);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),filter .2s}
+.next-banner:hover{transform:translateY(-2px);box-shadow:var(--e3)}
+.sec-hdr{animation:riseIn .4s var(--ease) both}
+.trip-card{box-shadow:var(--e1);transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease)}
+.trip-card:hover{transform:translateY(-4px);box-shadow:var(--e3)}
+.tc-hero{position:relative;overflow:hidden}
+.tc-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.16));pointer-events:none}
+.tc-bg-emoji{transition:transform .4s var(--ease-spring)}
+.trip-card:hover .tc-bg-emoji{transform:rotate(-6deg) scale(1.08)}
+.btn{transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform .12s var(--ease),box-shadow var(--dur) var(--ease)}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn-primary{box-shadow:var(--e-sea)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(27,94,123,.32)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--ring)}
+.cd-num,.nb-num{font-variant-numeric:tabular-nums}
+.modal-overlay{backdrop-filter:blur(3px);animation:idxFade .2s var(--ease)}
+@keyframes idxFade{from{opacity:0}to{opacity:1}}
+.modal,.mini-modal{box-shadow:var(--e3);animation:idxModalIn .3s var(--ease-spring) both}
+@keyframes idxModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.status-bar{border-radius:10px;box-shadow:var(--e3);backdrop-filter:blur(8px);background:rgba(26,26,26,.92);transform:translateY(8px);transition:opacity .3s var(--ease),transform .3s var(--ease-spring)}
+.status-bar.show{transform:translateY(0)}
+.emoji-btn,.theme-btn,.act-chip{transition:transform .12s var(--ease-spring),box-shadow var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+.emoji-btn:hover,.theme-btn:hover,.act-chip:hover{transform:translateY(-1px) scale(1.04)}
+
+/* ═══════════ TAG MANAGER ═══════════ */
+.tag-mgr-row{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid var(--border);border-radius:8px;transition:background .12s}
+.tag-mgr-row:last-child{border-bottom:none}
+.tag-mgr-row.drag-over{outline:2px dashed var(--sea2);outline-offset:-2px;background:var(--sea-lt)}
+.tag-mgr-row.drag-ghost{opacity:.4}
+.tm-icon{width:44px;text-align:center;font-size:1.05rem;padding:8px 4px;border:1px solid var(--border);border-radius:9px;background:var(--sand);font-family:inherit;outline:none;flex-shrink:0;transition:border-color var(--dur) var(--ease)}
+.tm-name{flex:1;min-width:0;padding:8px 12px;border:1px solid var(--border);border-radius:9px;background:var(--sand);font-family:'Hanken Grotesk',sans-serif;font-size:.9rem;color:var(--ink);outline:none;transition:border-color var(--dur) var(--ease)}
+.tm-name:focus,.tm-icon:focus{border-color:var(--sea2);background:var(--white)}
+.tm-color{width:32px;height:32px;border-radius:9px;border:2px solid var(--white);box-shadow:0 0 0 1px var(--border);cursor:pointer;flex-shrink:0;transition:transform .12s var(--ease-spring)}
+.tm-color:hover{transform:scale(1.1)}
+.tag-select{box-shadow:0 1px 2px rgba(26,26,26,.05);font-weight:500}
+.day-hdr-tag{box-shadow:0 1px 2px rgba(26,26,26,.05)}
+
+/* ═══════════ DESIGN REFRESH — signature dashboard hero ═══════════ */
+.dash-hero{background:linear-gradient(120deg,var(--sea) 0%,var(--sea2) 48%,#2E92C4 100%);background-size:160% 160%;animation:heroFlow 14s var(--ease) infinite}
+@keyframes heroFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.dash-hero::before{content:"";position:absolute;top:-60%;left:-30%;width:60%;height:220%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.13),transparent);transform:rotate(8deg);animation:heroSheen 9s var(--ease) infinite;pointer-events:none}
+@keyframes heroSheen{0%{left:-40%}55%,100%{left:130%}}
+.dash-hero-bg-emoji{animation:emojiFloat 7s ease-in-out infinite}
+@keyframes emojiFloat{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-4deg) translateY(-8px)}}
+.dash-hero-num{font-variant-numeric:tabular-nums}
+.cal-cell.trip-day{background-image:linear-gradient(135deg,transparent 92%,rgba(196,118,42,.18) 0)}
+.map-legend-item{transition:transform .12s var(--ease-spring),background var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.map-legend-item:hover{transform:translateY(-1px)}
+.wish-badge,.note-tag,.task-tag{box-shadow:0 1px 2px rgba(26,26,26,.04)}
+
+/* ═══════════ iPHONE / TOUCH POLISH ═══════════ */
+html{-webkit-text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior-y:none}
+.main,.notes-list,.notes-body,.rt-body,.wx-forecast-scroll,.task-view-board,#tag-mgr-list{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+@supports(padding:max(0px)){
+  .site-header{padding-left:max(2rem,env(safe-area-inset-left));padding-right:max(2rem,env(safe-area-inset-right))}
+}
+@media(display-mode:standalone){
+  .site-header{height:auto;min-height:56px;padding-top:env(safe-area-inset-top)}
+}
+@media(hover:none){
+  .btn:hover,.trip-card:hover,.stat-card:hover,.card:hover,.nav-item:hover,.wx-day-card:hover{transform:none}
+  .btn:active{transform:scale(.96)}
+  .nav-item:active,.btab:active,.more-item:active{background:rgba(0,0,0,.04)}
+}
+@media(max-width:680px){
+  .rich-toolbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .rich-toolbar::-webkit-scrollbar{display:none}
+  .rt-btn{min-width:36px;height:36px;flex-shrink:0}
+  .btn-icon,.del-btn{min-width:34px;min-height:34px}
+  .day-actions .btn-icon{min-width:36px;min-height:36px}
+  .modal,.task-modal,.mini-modal{max-height:88dvh;overflow-y:auto}
+  .tag-mgr-row{gap:6px}
+  .tm-icon{width:40px}
+  .tm-color{width:30px;height:30px}
+  .dash-hero-num{font-size:2.4rem}
+  .page-title{font-size:1.5rem}
+  .cp-meta-actions{margin-left:0;width:100%;margin-top:4px}
+  .cp-meta{flex-wrap:wrap}
+  .icon-pop{position:fixed;left:50%!important;top:auto!important;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);width:calc(100vw - 24px);max-width:360px;grid-template-columns:repeat(8,1fr)}
+  #tm-color-pop{position:fixed;left:50%!important;top:auto!important;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%)}
+}
+
+/* ══════ COASTAL REFRESH v3 (hub) ══════ */
+#auth-screen{background:linear-gradient(158deg,#102b31 0%,var(--ink) 55%,#193238 100%)!important}
+.auth-btn{transition:background .18s var(--ease),transform .12s var(--ease),box-shadow .18s var(--ease)}
+.auth-btn:hover{transform:translateY(-1px)}.auth-btn:active{transform:translateY(0) scale(.98)}
+.header-logo,.auth-logo{letter-spacing:.01em}
+.sec-title{font-size:1.55rem}
+.nb-name{font-size:2.35rem;letter-spacing:.004em}
+.tc-name{font-size:1.4rem}
+.modal-title{font-size:1.65rem}
+.empty-state h3{font-size:1.65rem}
+.cd-num{font-size:1.75rem}
+.nb-label{letter-spacing:.16em}
+.tc-hero::after{background:linear-gradient(180deg,transparent 46%,rgba(0,0,0,.24))!important}
+.next-banner{border-radius:20px}
+/* ── BEACH & SUNSET (hub) ── */
+body{background:radial-gradient(1150px 640px at 100% -10%,rgba(232,99,61,.13),transparent 56%),radial-gradient(820px 520px at -10% 112%,rgba(14,156,154,.08),transparent 50%),var(--sand)!important}
+#auth-screen{background:linear-gradient(162deg,#2E1A24 0%,#6B3328 52%,#B0512F 100%)!important}
+.site-header{background:linear-gradient(100deg,#C96E54 0%,#D78A68 52%,#E3A87C 100%)!important;box-shadow:0 5px 20px rgba(190,92,62,.18)!important}
+.site-header .header-logo span{color:#FFDFA0}
+.site-header #header-user{color:rgba(255,255,255,.82)!important}
+.site-header .conn-badge{background:rgba(255,255,255,.82)!important}
+.next-banner{box-shadow:0 14px 40px rgba(210,90,58,.18),var(--e2)!important}
+.tc-desc{cursor:text;border-radius:8px;padding:2px 4px;margin:-2px -4px;transition:background .15s,box-shadow .15s}
+.tc-desc:hover{background:var(--sand)}
+.tc-desc-ph{color:var(--ink3);opacity:.78}
+.tc-desc.editing{-webkit-line-clamp:unset!important;display:block;overflow:visible;background:var(--white);box-shadow:0 0 0 2px var(--sea-lt),var(--e1);cursor:text}
+/* ═══════════ iOS FIT (hub) ═══════════ */
+html{overflow-x:hidden}
+img,svg,video,iframe,table{max-width:100%}
+#header-user{color:rgba(255,255,255,.55)}
+@media(max-width:680px){
+  .site-header{padding-left:1rem;padding-right:1rem;gap:8px}
+  .site-header>div{min-width:0}
+  .header-logo{white-space:nowrap;flex-shrink:0}
+  #header-user{display:none}
+  #conn-badge span{display:none}
+  #conn-badge{padding:5px;flex-shrink:0}
+  .modal-row{grid-template-columns:1fr}
+}
+@supports(padding:max(0px)){
+  @media(max-width:680px){.site-header{padding-left:max(1rem,env(safe-area-inset-left));padding-right:max(1rem,env(safe-area-inset-right))}}
+}
+/* ═══════════ PREMIUM REFRESH v4 (hub) — type, contrast, depth ═══════════ */
+:root{--radius:14px;--radius-lg:20px;--ink2:#33433E;--ink3:#5B6A65}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;color:var(--ink)}
+.header-logo{font-weight:600;letter-spacing:.005em}
+.sec-title{font-weight:600;letter-spacing:-.015em;color:var(--ink)}
+.nb-name{font-weight:600;letter-spacing:-.01em}
+.nb-meta{opacity:.82}
+.tc-name{font-weight:600}
+.empty-state,.muted,.sub{color:var(--ink3)}
+/* Premium header depth */
+.site-header{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 26px -12px rgba(8,18,22,.5),0 2px 8px rgba(8,18,22,.18)}
+.site-header .header-logo{color:#fff}
+#header-user{color:rgba(255,255,255,.6)}
+/* Refined trip cards */
+.trip-card{border:1px solid rgba(8,18,22,.07);box-shadow:0 1px 2px rgba(8,18,22,.04),0 10px 26px -14px rgba(8,18,22,.16)}
+.trip-card:hover{transform:translateY(-4px);box-shadow:0 2px 6px rgba(8,18,22,.06),0 22px 44px -16px rgba(8,18,22,.24)}
+.next-banner{box-shadow:0 16px 40px -18px rgba(8,18,22,.45),0 2px 8px rgba(8,18,22,.12)}
+.next-banner:hover{transform:translateY(-2px)}
+.btn-primary{font-weight:600;box-shadow:0 5px 16px -6px rgba(21,94,120,.4),0 1px 2px rgba(0,0,0,.08)}
+.btn-primary:hover{transform:translateY(-1px)}
+@media(max-width:640px){.nb-name{font-size:1.7rem}.sec-title{font-size:1.4rem}}
+
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" style="display:flex">
+  <div class="auth-card">
+    <div id="auth-login-view">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub" id="auth-who-sub">Who's planning?</div>
+      <div id="auth-person-picker" style="display:flex;flex-direction:column">
+        <button class="auth-btn auth-btn-p1" onclick="showSignInForm('p1')">👤 Sign in as Joshua</button>
+        <button class="auth-btn auth-btn-p2" onclick="showSignInForm('p2')" style="margin-top:.75rem">👤 Sign in as Allie</button>
+      </div>
+      <form id="auth-password-form" style="display:none" onsubmit="submitSignIn();return false">
+        <input type="email" id="auth-form-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
+        <div class="auth-field"><label>Password</label>
+          <input type="password" id="auth-form-password" autocomplete="current-password" placeholder="Your password"></div>
+        <button type="submit" class="auth-btn" id="auth-form-btn">Sign in</button>
+        <div style="text-align:center;margin-top:.875rem">
+          <button type="button" class="auth-resend" onclick="backToPicker()">← Change person</button>
+          &nbsp;·&nbsp;
+          <button type="button" class="auth-resend" onclick="showMagicLinkView()">Magic link instead</button>
+        </div>
+      </form>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+    <div id="auth-magic-view" style="display:none">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub">We'll email you a one-tap login link</div>
+      <div class="auth-field"><label>Email address</label>
+        <input type="email" id="auth-magic-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')sendMagicLink()"></div>
+      <button class="auth-btn" id="auth-magic-btn" onclick="sendMagicLink()">Send magic link</button>
+      <div class="auth-msg" id="auth-magic-msg"></div>
+      <div style="text-align:center;margin-top:1rem"><button class="auth-resend" onclick="showLoginView()">← Back</button></div>
+    </div>
+    <div id="auth-sent-view" style="display:none;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:.875rem">✉️</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:.5rem">Check your email</h3>
+      <p style="font-size:.85rem;color:var(--ink3);line-height:1.6;margin-bottom:1.25rem">We sent a link to<br><strong id="auth-email-shown" style="color:var(--ink)"></strong></p>
+      <button class="auth-resend" onclick="showMagicLinkView()">← Try a different email</button>
+    </div>
+    <div id="auth-set-password-view" style="display:none">
+      <div class="auth-logo">My <span>Holidays</span></div>
+      <div class="auth-sub" id="auth-set-pwd-sub">Set a password for future logins</div>
+      <input type="email" id="auth-set-pwd-email" autocomplete="username" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none" tabindex="-1">
+      <div class="auth-field"><label>New password</label>
+        <input type="password" id="auth-new-password" autocomplete="new-password" placeholder="Choose a password" onkeydown="if(event.key==='Enter')document.getElementById('auth-confirm-password').focus()"></div>
+      <div class="auth-field"><label>Confirm password</label>
+        <input type="password" id="auth-confirm-password" autocomplete="new-password" placeholder="Repeat it" onkeydown="if(event.key==='Enter')setPassword()"></div>
+      <button class="auth-btn" id="auth-set-pwd-btn" onclick="setPassword()">Set password &amp; continue</button>
+      <div class="auth-msg" id="auth-set-pwd-msg"></div>
+      <div style="text-align:center;margin-top:1rem"><button class="auth-resend" onclick="skipSetPassword()">Skip for now</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div style="display:flex;align-items:center;gap:.875rem">
+    <span class="header-logo">My <span>Holidays</span></span>
+    <div id="conn-badge" class="conn-badge conn-wait"><div class="conn-dot"></div><span>Connecting…</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="header-user" style="font-size:.75rem;color:rgba(255,255,255,.38)"></span>
+    <button class="btn-ghost" style="font-size:.75rem;padding:5px 10px" onclick="signOut()">Sign out</button>
+    <button class="btn btn-primary btn-sm" onclick="openTripModal()">+ Plan holiday</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="app-main" style="display:none">
+  <div style="padding:1.5rem 2rem .5rem" id="banner-wrap"></div>
+  <div class="sec-hdr">
+    <div>
+      <div class="sec-title">All holidays</div>
+      <div class="sec-sub" id="sec-sub">Loading…</div>
+    </div>
+    <button class="btn btn-sm" onclick="openTripModal()">+ Add holiday</button>
+  </div>
+  <div id="trips-grid" class="trips-grid"></div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
+<div id="trip-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeTripModal()">
+  <div class="modal">
+    <div class="modal-title" id="tm-title">Plan a new holiday</div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Holiday name</label><input id="tm-name" type="text" placeholder="e.g. Japan 2027"></div>
+      <div class="modal-field"><label>Destination</label><input id="tm-dest" type="text" placeholder="e.g. Tokyo, Japan" onblur="liveGeocode()"><div id="tm-geo-status" style="font-size:.72rem;margin-top:4px;min-height:16px;transition:color .2s"></div></div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field"><label>Start date</label><input id="tm-start" type="date"></div>
+      <div class="modal-field"><label>End date</label><input id="tm-end" type="date"></div>
+    </div>
+    <div class="modal-field"><label>Description <span style="text-transform:none;letter-spacing:0;font-size:.7rem">(optional)</span></label>
+      <textarea id="tm-desc" placeholder="What are you most excited about?"></textarea></div>
+    <div style="margin-bottom:1.25rem">
+      <span class="modal-sec-lbl">Choose an emoji</span>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <span class="modal-sec-lbl">Colour theme</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="theme-grid" id="theme-grid"></div>
+        <span id="theme-name-lbl" style="font-size:.78rem;color:var(--ink3)"></span>
+      </div>
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <span class="modal-sec-lbl">Activities</span>
+      <div class="act-chips" id="act-chips"></div>
+    </div>
+    <details style="margin-bottom:.875rem">
+      <summary>Link to an existing planner file</summary>
+      <div class="modal-field" style="margin-top:.75rem;margin-bottom:0">
+        <label>Planner file URL</label>
+        <input id="tm-url" type="text" placeholder="e.g. corfu2026.html (leave blank to auto-generate)">
+        <p style="font-size:.7rem;color:var(--ink3);margin-top:4px;line-height:1.5">Leave blank — a generic planner will open at <code style="background:var(--sand2);padding:1px 4px;border-radius:3px">planner.html?id=…</code></p>
+      </div>
+    </details>
+    <div class="modal-actions">
+      <button id="tm-delete-btn" class="btn btn-danger btn-sm" style="display:none;margin-right:auto" onclick="deleteCurrentTrip()">Delete holiday</button>
+      <button class="btn btn-sm" onclick="closeTripModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveTripModal()">Save holiday</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div id="confirm-overlay" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="mini-modal">
+    <p id="confirm-msg"></p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-sm" onclick="document.getElementById('confirm-overlay').style.display='none'">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="status-bar" class="status-bar"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" onerror="loadFallback()"></script>
+<script>
+function loadFallback(){const s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';document.head.appendChild(s);}
+</script>
+<script>
+/* CONFIG */
+const SUPABASE_URL='https://dvrbanhjauioaravcwsz.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cmJhbmhqYXVpb2FyYXZjd3N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzI4MDgsImV4cCI6MjA5NTcwODgwOH0.H-AJwVmq8eTpUy1uqENT0FUnnqb5DCXr3DVQy5i2xBE';
+const P1_EMAIL='joshua_isaac@me.com';
+const P2_EMAIL='alliestott@icloud.com';
+const TRIPS_KEY='__trips__';
+
+/* CONSTANTS */
+const COLOR_THEMES={
+  mediterranean:{gradient:'linear-gradient(135deg,#0E4A60 0%,#1B6B86 55%,#2E92B5 100%)',name:'Mediterranean'},
+  terracotta:   {gradient:'linear-gradient(135deg,#6E2A16 0%,#A85327 55%,#CE8A3E 100%)',name:'Terracotta'},
+  jungle:       {gradient:'linear-gradient(135deg,#123320 0%,#235E2C 55%,#3E8F46 100%)',name:'Jungle'},
+  lavender:     {gradient:'linear-gradient(135deg,#2E2160 0%,#4F3A9E 55%,#7C5BD0 100%)',name:'Lavender'},
+  sunset:       {gradient:'linear-gradient(135deg,#6E1A2A 0%,#B23A2E 50%,#E0743F 100%)',name:'Sunset'},
+  midnight:     {gradient:'linear-gradient(135deg,#0C1626 0%,#162943 55%,#27456E 100%)',name:'Midnight'},
+  rose:         {gradient:'linear-gradient(135deg,#5C1733 0%,#9E2E5E 55%,#C75A86 100%)',name:'Rose'},
+  desert:       {gradient:'linear-gradient(135deg,#4E3209 0%,#9A7414 55%,#CBA02E 100%)',name:'Desert'},
+};
+const EMOJIS=['🏝','🌍','🏔','🌋','🏜','🌊','🏕','🌸','✈️','🚢','🛵','🌴','🗼','🏯','🎪','🌅','🌃','🍷','🎭','🏖','🤿','⛷','🌺','🗿','🎨','🚵','🌙','🧳'];
+const ACTIVITIES=[
+  {id:'Diving',icon:'🤿'},{id:'Sailing',icon:'⛵'},{id:'Kitesurfing',icon:'🪁'},
+  {id:'Hiking',icon:'🥾'},{id:'History',icon:'🏛'},{id:'Food',icon:'🍽'},
+  {id:'Culture',icon:'🎭'},{id:'Beaches',icon:'🏖'},{id:'Safari',icon:'🦁'},
+  {id:'Skiing',icon:'⛷'},{id:'Cycling',icon:'🚴'},{id:'Photography',icon:'📷'},
+  {id:'Nightlife',icon:'🌙'},{id:'Spa',icon:'💆'},{id:'Wildlife',icon:'🦎'},
+];
+const DEFAULT_TRIPS=[{
+  id:'corfu2026',name:'Corfu 2026',destination:'Corfu, Greece',emoji:'🏝',theme:'mediterranean',
+  startDate:'2026-08-07',endDate:'2026-08-18',
+  activities:['Diving','Sailing','Kitesurfing','Hiking','History'],
+  description:'An adventurous 12-day island break — diving wrecks, sailing to Paxos, and hiking Porto Timoni.',
+  plannerUrl:'corfu2026.html',created:new Date().toISOString()
+}];
+
+/* STATE */
+let sb=null,currentUser='p1',currentSession=null,tripsState=[];
+let editingTripId=null,selectedEmoji='🏝',selectedTheme='mediterranean',selectedActivities=[];
+let stTimer=null;
+
+/* HELPERS */
+function getTripStatus(t){
+  if(!t.startDate)return'planning';
+  const now=new Date(),s=new Date(t.startDate),e=t.endDate?new Date(t.endDate+'T23:59:59'):null;
+  if(now>=s&&(!e||now<=e))return'active';
+  if(s>now)return'upcoming';
+  return'completed';
+}
+function getDaysTo(t){if(!t.startDate)return null;return Math.ceil((new Date(t.startDate)-new Date())/864e5);}
+function getDuration(t){if(!t.startDate||!t.endDate)return null;return Math.ceil((new Date(t.endDate)-new Date(t.startDate))/864e5)+1;}
+function formatDateRange(t){
+  if(!t.startDate)return'Dates TBD';
+  const opts={day:'numeric',month:'short'},s=new Date(t.startDate),e=t.endDate?new Date(t.endDate):null;
+  const fmt=d=>d.toLocaleDateString('en-GB',opts);
+  if(!e)return fmt(s);
+  return s.getMonth()===e.getMonth()?`${s.getDate()} – ${fmt(e)}`:`${fmt(s)} – ${fmt(e)}`;
+}
+function genId(){return'trip-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function flash(msg){const el=document.getElementById('status-bar');el.textContent=msg;el.classList.add('show');clearTimeout(stTimer);stTimer=setTimeout(()=>el.classList.remove('show'),2400);}
+function setConn(type,text){const el=document.getElementById('conn-badge');el.className='conn-badge conn-'+type;el.innerHTML=`<div class="conn-dot"></div><span>${text}</span>`;}
+
+/* AUTH */
+async function waitForSupabase(timeout=8000){
+  const start=Date.now();
+  while(typeof supabase==='undefined'||typeof supabase.createClient!=='function'){
+    if(Date.now()-start>timeout)throw new Error('Supabase failed to load');
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+let _signingInAs=null;
+function showLoginView(){
+  ['auth-password-form','auth-magic-view','auth-sent-view','auth-set-password-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('auth-login-view').style.display='block';
+  document.getElementById('auth-person-picker').style.display='flex';
+  document.getElementById('auth-who-sub').textContent="Who's planning?";
+  document.getElementById('auth-msg').className='auth-msg';
+}
+function showSignInForm(who){
+  _signingInAs=who;
+  const name=who==='p1'?'Joshua':'Allie';
+  document.getElementById('auth-person-picker').style.display='none';
+  document.getElementById('auth-who-sub').textContent=`Welcome back, ${name}`;
+  document.getElementById('auth-form-email').value=who==='p1'?P1_EMAIL:P2_EMAIL;
+  document.getElementById('auth-form-password').value='';
+  const btn=document.getElementById('auth-form-btn');
+  btn.style.cssText=who==='p1'?'background:var(--sea)':'background:var(--teal)';
+  btn.disabled=false;btn.textContent='Sign in';
+  document.getElementById('auth-password-form').style.display='block';
+  document.getElementById('auth-msg').className='auth-msg';
+  setTimeout(()=>document.getElementById('auth-form-password')?.focus(),80);
+}
+function backToPicker(){
+  _signingInAs=null;
+  document.getElementById('auth-person-picker').style.display='flex';
+  document.getElementById('auth-password-form').style.display='none';
+  document.getElementById('auth-who-sub').textContent="Who's planning?";
+  document.getElementById('auth-msg').className='auth-msg';
+}
+async function submitSignIn(){
+  if(!_signingInAs)return;
+  const email=_signingInAs==='p1'?P1_EMAIL:P2_EMAIL;
+  const password=document.getElementById('auth-form-password').value;
+  const msg=document.getElementById('auth-msg');msg.className='auth-msg';
+  if(!password){msg.className='auth-msg error';msg.textContent='Please enter your password.';return;}
+  if(!sb){msg.className='auth-msg error';msg.textContent='Still connecting — please wait.';return;}
+  const btn=document.getElementById('auth-form-btn');btn.disabled=true;btn.textContent='Signing in…';
+  try{
+    const{error}=await sb.auth.signInWithPassword({email,password});
+    if(error)throw error;
+  }catch(e){
+    const isWrong=e?.message?.toLowerCase().includes('invalid')||e?.message?.toLowerCase().includes('credentials');
+    msg.className='auth-msg error';msg.textContent=isWrong?'Incorrect password — try again.':(e?.message||'Sign in failed.');
+    btn.disabled=false;btn.textContent='Sign in';
+  }
+}
+function showMagicLinkView(){
+  document.getElementById('auth-login-view').style.display='none';
+  document.getElementById('auth-magic-view').style.display='block';
+  document.getElementById('auth-magic-btn').disabled=false;
+  document.getElementById('auth-magic-btn').textContent='Send magic link';
+  document.getElementById('auth-magic-msg').className='auth-msg';
+}
+async function sendMagicLink(){
+  const email=document.getElementById('auth-magic-email').value.trim();
+  const btn=document.getElementById('auth-magic-btn');
+  const msg=document.getElementById('auth-magic-msg');msg.className='auth-msg';
+  if(!email||!email.includes('@')){msg.className='auth-msg error';msg.textContent='Please enter a valid email.';return;}
+  if(email.toLowerCase()!==P1_EMAIL.toLowerCase()&&email.toLowerCase()!==P2_EMAIL.toLowerCase()){
+    msg.className='auth-msg error';msg.textContent="That email isn't registered for this planner.";return;
+  }
+  if(!sb){msg.className='auth-msg error';msg.textContent='Still connecting — please wait.';return;}
+  btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const{error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href,shouldCreateUser:true}});
+    if(error)throw error;
+    document.getElementById('auth-email-shown').textContent=email;
+    document.getElementById('auth-magic-view').style.display='none';
+    document.getElementById('auth-sent-view').style.display='block';
+  }catch(e){
+    msg.className='auth-msg error';msg.textContent=e?.message||'Something went wrong.';
+    btn.disabled=false;btn.textContent='Send magic link';
+  }
+}
+function showSetPasswordView(session,isReset=false){
+  if(session)currentSession=session;
+  document.getElementById('auth-set-pwd-sub').textContent=isReset?'Choose a new password':'Set a password for future logins';
+  document.getElementById('auth-set-pwd-email').value=session?.user?.email||'';
+  ['auth-login-view','auth-magic-view','auth-sent-view'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('auth-set-password-view').style.display='block';
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('auth-new-password').value='';
+  document.getElementById('auth-confirm-password').value='';
+}
+async function setPassword(){
+  const pwd=document.getElementById('auth-new-password').value;
+  const confirm=document.getElementById('auth-confirm-password').value;
+  const btn=document.getElementById('auth-set-pwd-btn');
+  const msg=document.getElementById('auth-set-pwd-msg');msg.className='auth-msg';
+  if(!pwd||pwd.length<6){msg.className='auth-msg error';msg.textContent='Password must be at least 6 characters.';return;}
+  if(pwd!==confirm){msg.className='auth-msg error';msg.textContent="Passwords don't match.";return;}
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const{error}=await sb.auth.updateUser({password:pwd});
+    if(error)throw error;
+    msg.className='auth-msg success';msg.textContent='Password set! Loading…';
+    setTimeout(completeSignIn,800);
+  }catch(e){
+    msg.className='auth-msg error';msg.textContent=e?.message||'Could not set password.';
+    btn.disabled=false;btn.textContent='Set password & continue';
+  }
+}
+function skipSetPassword(){completeSignIn();}
+async function signOut(){
+  await sb?.auth.signOut();
+  currentSession=null;
+  document.getElementById('app-main').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+  showLoginView();
+}
+function resolveUser(email){return email?.toLowerCase()===P2_EMAIL.toLowerCase()?'p2':'p1';}
+
+/* INIT */
+async function init(){
+  try{await waitForSupabase();}
+  catch(e){
+    const msg=document.getElementById('auth-msg');
+    msg.className='auth-msg error';
+    msg.textContent='Could not load auth library. Please check your connection and refresh.';
+    return;
+  }
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){
+    if(window.location.hash.includes('type=recovery'))showSetPasswordView(session,true);
+    else await onSignedIn(session);
+  }else{
+    document.getElementById('auth-screen').style.display='flex';
+    const{data:{subscription}}=sb.auth.onAuthStateChange(async(event,newSession)=>{
+      if(event==='PASSWORD_RECOVERY'&&newSession)showSetPasswordView(newSession,true);
+      else if(event==='SIGNED_IN'&&newSession)await onSignedIn(newSession);
+    });
+    window._authSub=subscription;
+  }
+}
+async function onSignedIn(session){
+  currentSession=session;
+  const needsPassword=session?.user?.user_metadata?.has_password!==true&&session?.user?.app_metadata?.provider==='email';
+  if(needsPassword){showSetPasswordView(session);return;}
+  await completeSignIn();
+}
+async function completeSignIn(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session)return;
+  currentSession=session;
+  if(session.user.user_metadata?.has_password!==true)await sb.auth.updateUser({data:{has_password:true}});
+  currentUser=resolveUser(session.user.email);
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app-main').style.display='block';
+  document.getElementById('header-user').textContent=currentUser==='p1'?'Joshua':'Allie';
+  setConn('wait','Connecting…');
+  showGridSkeleton();
+  try{await loadFromDB();setConn('ok','Live & synced');subscribeToChanges();}
+  catch(e){console.error(e);setConn('err','Offline mode');loadLocal();}
+  renderApp();
+  if(window._authSub){window._authSub.unsubscribe();window._authSub=null;}
+  sb.auth.onAuthStateChange((event,s)=>{
+    if(event==='SIGNED_OUT')signOut();
+    if(event==='TOKEN_REFRESHED'&&s)currentSession=s;
+  });
+}
+
+/* DATA */
+async function loadFromDB(){
+  const{data,error}=await sb.from('planner_state').select('*').eq('trip_id',TRIPS_KEY).single();
+  if(error&&error.code==='PGRST116'){
+    tripsState=DEFAULT_TRIPS.map(t=>({...t}));
+    await sb.from('planner_state').insert({trip_id:TRIPS_KEY,state:{trips:tripsState}});
+  }else if(error){
+    throw error;
+  }else{
+    tripsState=data.state?.trips||[];
+    if(!tripsState.find(t=>t.id==='corfu2026')){tripsState.unshift({...DEFAULT_TRIPS[0]});await persistToDB();}
+  }
+  saveLocal();
+}
+async function persistToDB(){
+  if(!sb||!currentSession)return;
+  try{await sb.from('planner_state').upsert({trip_id:TRIPS_KEY,state:{trips:tripsState}});flash('Saved ✓');}
+  catch(e){flash('Save failed — check your connection');}
+}
+function saveLocal(){try{localStorage.setItem('myholidays__v1',JSON.stringify(tripsState));}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem('myholidays__v1');tripsState=r?JSON.parse(r):DEFAULT_TRIPS.map(t=>({...t}));}catch(e){tripsState=DEFAULT_TRIPS.map(t=>({...t}));}}
+function subscribeToChanges(){
+  sb.channel('trips-hub-sync')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'planner_state',filter:`trip_id=eq.${TRIPS_KEY}`},p=>{
+      tripsState=p.new.state?.trips||[];saveLocal();renderApp();flash('Updated by partner ✓');
+    }).subscribe();
+}
+
+/* RENDER */
+function showGridSkeleton(){
+  const grid=document.getElementById('trips-grid');if(!grid)return;
+  let cached=[];try{cached=JSON.parse(localStorage.getItem('myholidays__v1')||'[]');}catch(e){}
+  const n=Math.min(Math.max(cached.length||3,2),6);
+  grid.innerHTML=Array.from({length:n}).map(()=>`<div class="skel-card"><div class="skel-hero skeleton"></div><div class="skel-body"><div class="skel-line skeleton" style="width:70%"></div><div class="skel-line skeleton" style="width:45%"></div><div style="display:flex;gap:6px;margin-top:.3rem"><span class="skel-pill skeleton"></span><span class="skel-pill skeleton" style="width:54px"></span></div><div class="skel-line skeleton" style="width:100%;margin-top:auto;height:34px;border-radius:8px"></div></div></div>`).join('');
+}
+function renderApp(){renderBanner();renderGrid();updateSub();}
+function updateSub(){
+  const total=tripsState.length;
+  const active=tripsState.filter(t=>getTripStatus(t)==='active').length;
+  const upcoming=tripsState.filter(t=>getTripStatus(t)==='upcoming').length;
+  let sub=`${total} holiday${total!==1?'s':''}`;
+  if(active)sub+=` · ${active} underway`;
+  else if(upcoming)sub+=` · ${upcoming} upcoming`;
+  document.getElementById('sec-sub').textContent=sub;
+}
+function renderBanner(){
+  const wrap=document.getElementById('banner-wrap');
+  const candidates=[...tripsState].filter(t=>t.startDate&&getTripStatus(t)!=='completed').sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+  const trip=candidates.find(t=>getTripStatus(t)==='active')||candidates[0];
+  if(!trip){wrap.innerHTML='';return;}
+  const theme=COLOR_THEMES[trip.theme]||COLOR_THEMES.mediterranean;
+  const status=getTripStatus(trip);
+  const daysTo=getDaysTo(trip);
+  const duration=getDuration(trip);
+  const acts=(trip.activities||[]).slice(0,5).map(a=>{
+    const f=ACTIVITIES.find(x=>x.id===a);
+    return`<span class="nb-pill">${f?f.icon+' ':''}${a}</span>`;
+  }).join('');
+  let countdown='';
+  if(status==='active')countdown=`<div class="nb-countdown"><div class="nb-num">✈</div><div class="nb-lbl">Underway</div></div>`;
+  else if(daysTo===0)countdown=`<div class="nb-countdown"><div class="nb-num" style="font-size:2.8rem">Today!</div></div>`;
+  else if(daysTo>0)countdown=`<div class="nb-countdown"><div class="nb-num">${daysTo}</div><div class="nb-lbl">days to go</div></div>`;
+  wrap.innerHTML=`<div class="next-banner" style="background:${theme.gradient}" onclick="openTrip('${trip.id}')">
+    <div class="nb-bg-emoji">${trip.emoji}</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:2rem">
+      <div style="flex:1;min-width:0">
+        <div class="nb-label">${status==='active'?'Currently away':'Next trip'}</div>
+        <div class="nb-name">${esc(trip.name)}</div>
+        <div class="nb-meta">📍 ${esc(trip.destination||'')}${trip.startDate?` · ${formatDateRange(trip)}`:''}${duration?` · ${duration} days`:''}</div>
+        ${acts?`<div class="nb-pills">${acts}</div>`:''}
+        <button class="btn-ghost" style="font-size:.8rem;padding:6px 16px" onclick="event.stopPropagation();openTrip('${trip.id}')">Open planner →</button>
+      </div>${countdown}
+    </div>
+  </div>`;
+}
+function renderGrid(){
+  const grid=document.getElementById('trips-grid');grid.innerHTML='';
+  if(!tripsState.length){
+    grid.innerHTML=`<div class="empty-state"><span class="empty-state-icon">🗺</span><h3>No holidays yet</h3><p>Start planning your first adventure together</p><button class="btn btn-primary" onclick="openTripModal()">+ Plan a holiday</button></div>`;
+    return;
+  }
+  const order={active:0,upcoming:1,planning:2,completed:3};
+  const sorted=[...tripsState].sort((a,b)=>{
+    const sa=order[getTripStatus(a)],sb2=order[getTripStatus(b)];
+    if(sa!==sb2)return sa-sb2;
+    if(a.startDate&&b.startDate)return new Date(a.startDate)-new Date(b.startDate);
+    return 0;
+  });
+  sorted.forEach((trip,i)=>{const c=buildCard(trip);c.classList.add('tc-anim');c.style.animationDelay=(i*0.04)+'s';grid.appendChild(c);});
+  const add=document.createElement('div');
+  add.className='trip-card';
+  add.style.cssText='border:2px dashed var(--sand2)!important;background:transparent!important;box-shadow:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:.75rem;cursor:pointer;transition:all .2s';
+  add.onmouseover=()=>{add.style.borderColor='var(--sea2)';add.style.background='var(--sea-lt)';};
+  add.onmouseout=()=>{add.style.borderColor='var(--sand2)';add.style.background='transparent';};
+  add.onclick=()=>openTripModal();
+  add.innerHTML='<div style="font-size:2rem;opacity:.25;line-height:1">+</div><div style="font-size:.875rem;font-weight:500;color:var(--ink3)">Plan a new holiday</div>';
+  grid.appendChild(add);
+}
+function buildCard(trip){
+  const theme=COLOR_THEMES[trip.theme]||COLOR_THEMES.mediterranean;
+  const status=getTripStatus(trip);
+  const daysTo=getDaysTo(trip);
+  const duration=getDuration(trip);
+  const statusLabels={upcoming:'Upcoming',active:'Away ✈',planning:'Planning',completed:'Completed'};
+  const acts=(trip.activities||[]).slice(0,5).map(a=>{
+    const f=ACTIVITIES.find(x=>x.id===a);return`<span class="act-pill">${f?f.icon+' ':''}${a}</span>`;
+  }).join('');
+  let footerLeft='';
+  if(status==='upcoming'&&daysTo>0)footerLeft=`<div><div class="cd-num">${daysTo}</div><div class="cd-lbl">days to go</div></div>`;
+  else if(status==='upcoming'&&daysTo===0)footerLeft=`<div><div class="cd-num" style="font-size:1rem;font-family:inherit">Today!</div></div>`;
+  else if(status==='active')footerLeft=`<div style="font-size:.78rem;font-weight:500;color:var(--teal)">✈ Underway!</div>`;
+  else if(status==='planning')footerLeft=`<div style="font-size:.75rem;color:var(--ink3)">Dates TBD</div>`;
+  else if(status==='completed'&&trip.endDate){const ago=Math.abs(Math.ceil((new Date()-new Date(trip.endDate))/864e5));footerLeft=`<div style="font-size:.72rem;color:var(--ink3)">${ago}d ago</div>`;}
+  const card=document.createElement('div');card.className='trip-card';
+  card.innerHTML=`
+    <div class="tc-hero" style="background:${theme.gradient}">
+      <div class="tc-bg-emoji">${trip.emoji}</div>
+      <div class="tc-hero-top">
+        <span class="tc-emoji">${trip.emoji}</span>
+        <div class="tc-badges">
+          <span class="tc-status s-${status}">${statusLabels[status]}</span>
+          <button class="tc-edit" onclick="event.stopPropagation();openTripModal('${trip.id}')">✏ Edit</button>
+        </div>
+      </div>
+      <div class="tc-bottom"><div class="tc-name">${esc(trip.name)}</div></div>
+    </div>
+    <div class="tc-body">
+      <div class="tc-dest">📍 ${esc(trip.destination||'Destination TBD')}</div>
+      <div class="tc-dates">${formatDateRange(trip)}${duration?` · ${duration} days`:''}</div>
+      <div class="tc-desc" onclick="event.stopPropagation();startEditDesc(this,'${trip.id}')" title="Click to edit description">${trip.description?esc(trip.description):'<span class="tc-desc-ph">+ Add a description</span>'}</div>
+      ${acts?`<div class="tc-acts">${acts}</div>`:''}
+    </div>
+    <div class="tc-footer">
+      <div>${footerLeft}</div>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openTrip('${trip.id}')">Open planner →</button>
+    </div>`;
+  card.onclick=()=>openTrip(trip.id);
+  return card;
+}
+function startEditDesc(el,id){
+  if(el.classList.contains('editing'))return;
+  const ph=el.querySelector('.tc-desc-ph');
+  if(ph)el.textContent='';
+  el.classList.add('editing');
+  el.contentEditable='true';
+  el.focus();
+  try{const r=document.createRange();r.selectNodeContents(el);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
+  let done=false;
+  const finish=async(save)=>{
+    if(done)return;done=true;
+    el.contentEditable='false';el.classList.remove('editing');el.onblur=null;el.onkeydown=null;
+    const t=tripsState.find(x=>x.id===id);
+    if(save){
+      const txt=el.innerText.replace(/\s+$/,'').trim();
+      if(t&&(t.description||'')!==txt){t.description=txt;saveLocal();renderApp();await persistToDB();flash('Description saved ✓');return;}
+    }
+    renderApp();
+  };
+  el.onblur=()=>finish(true);
+  el.onkeydown=(e)=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finish(true);}
+    else if(e.key==='Escape'){e.preventDefault();finish(false);}
+  };
+}
+function openTrip(id){
+  const trip=tripsState.find(t=>t.id===id);if(!trip)return;
+  window.location.href=trip.plannerUrl||`planner.html?id=${encodeURIComponent(id)}`;
+}
+
+/* TRIP MODAL */
+function openTripModal(id){
+  editingTripId=id||null;
+  const trip=id?tripsState.find(t=>t.id===id):null;
+  document.getElementById('tm-title').textContent=trip?'Edit holiday':'Plan a new holiday';
+  document.getElementById('tm-name').value=trip?.name||'';
+  document.getElementById('tm-dest').value=trip?.destination||'';
+  document.getElementById('tm-start').value=trip?.startDate||'';
+  document.getElementById('tm-end').value=trip?.endDate||'';
+  document.getElementById('tm-desc').value=trip?.description||'';
+  document.getElementById('tm-url').value=trip?.plannerUrl||'';
+  document.getElementById('tm-delete-btn').style.display=trip?'block':'none';
+  const geoLbl=document.getElementById('tm-geo-status');
+  if(trip?.lat&&trip?.lng){geoLbl.style.color='var(--teal)';geoLbl.textContent=`\uD83D\uDCCD ${trip.destination||''} (${(+trip.lat).toFixed(3)}, ${(+trip.lng).toFixed(3)})`;}
+  else{geoLbl.textContent='';}
+  selectedEmoji=trip?.emoji||'🏝';
+  selectedTheme=trip?.theme||'mediterranean';
+  selectedActivities=[...(trip?.activities||[])];
+  buildEmojiPicker();buildThemePicker();buildActChips();
+  document.getElementById('trip-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('tm-name').focus(),80);
+}
+function closeTripModal(){document.getElementById('trip-modal').style.display='none';}
+function buildEmojiPicker(){
+  document.getElementById('emoji-grid').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn${e===selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+}
+function selectEmoji(e){selectedEmoji=e;document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.toggle('selected',b.textContent===e));}
+function buildThemePicker(){
+  document.getElementById('theme-grid').innerHTML=Object.entries(COLOR_THEMES).map(([key,t])=>`<div title="${t.name}" class="theme-swatch${key===selectedTheme?' selected':''}" style="background:${t.gradient}" onclick="selectTheme('${key}')"></div>`).join('');
+  document.getElementById('theme-name-lbl').textContent=COLOR_THEMES[selectedTheme]?.name||'';
+}
+function selectTheme(key){
+  selectedTheme=key;
+  document.querySelectorAll('.theme-swatch').forEach((el,i)=>el.classList.toggle('selected',Object.keys(COLOR_THEMES)[i]===key));
+  document.getElementById('theme-name-lbl').textContent=COLOR_THEMES[key]?.name||'';
+}
+function buildActChips(){
+  document.getElementById('act-chips').innerHTML=ACTIVITIES.map(a=>`<button class="act-chip${selectedActivities.includes(a.id)?' selected':''}" onclick="toggleAct('${a.id}')">${a.icon} ${a.id}</button>`).join('');
+}
+function toggleAct(id){
+  selectedActivities=selectedActivities.includes(id)?selectedActivities.filter(a=>a!==id):[...selectedActivities,id];
+  buildActChips();
+}
+async function saveTripModal(){
+  const name=document.getElementById('tm-name').value.trim();
+  if(!name){flash('Please enter a holiday name');return;}
+  const dest=document.getElementById('tm-dest').value.trim();
+  // Carry over existing coords if editing, then geocode if we have none
+  const existing=editingTripId?tripsState.find(t=>t.id===editingTripId):null;
+  let lat=existing?.lat||null, lng=existing?.lng||null;
+  if(dest&&(!lat||!lng)){
+    const lbl=document.getElementById('tm-geo-status');
+    lbl.style.color='var(--ink3)';lbl.textContent='Locating…';
+    const geo=await geocodeDest(dest);
+    if(geo){lat=geo.lat;lng=geo.lng;lbl.style.color='var(--teal)';lbl.textContent='📍 '+geo.name;}
+    else{lbl.style.color='var(--amber)';lbl.textContent='Location not found — map will centre when you open the planner';}
+  }
+  const trip={
+    id:editingTripId||genId(),name,
+    destination:dest,lat,lng,
+    emoji:selectedEmoji,theme:selectedTheme,
+    startDate:document.getElementById('tm-start').value,
+    endDate:document.getElementById('tm-end').value,
+    activities:[...selectedActivities],
+    description:document.getElementById('tm-desc').value.trim(),
+    plannerUrl:document.getElementById('tm-url').value.trim(),
+    created:existing?.created||new Date().toISOString()
+  };
+  if(editingTripId){const idx=tripsState.findIndex(t=>t.id===editingTripId);if(idx>-1)tripsState[idx]=trip;else tripsState.push(trip);}
+  else tripsState.push(trip);
+  closeTripModal();saveLocal();renderApp();await persistToDB();
+}
+function deleteCurrentTrip(){
+  const trip=tripsState.find(t=>t.id===editingTripId);
+  confirmAction(`Delete "${trip?.name||'this holiday'}"? The planner file won't be deleted.`,async()=>{
+    tripsState=tripsState.filter(t=>t.id!==editingTripId);closeTripModal();saveLocal();renderApp();await persistToDB();
+  });
+}
+
+/* CONFIRM */
+function confirmAction(msg,cb){
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-overlay').style.display='flex';
+  const ok=document.getElementById('confirm-ok'),nok=ok.cloneNode(true);
+  ok.parentNode.replaceChild(nok,ok);
+  nok.onclick=()=>{document.getElementById('confirm-overlay').style.display='none';cb();};
+}
+
+/* GEOCODING */
+async function geocodeDest(dest){
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(dest)}&format=json&limit=1`);
+    const d=await r.json();
+    if(d&&d.length>0){
+      const name=d[0].display_name.split(',').slice(0,2).join(',').trim();
+      return{lat:+d[0].lat,lng:+d[0].lon,name};
+    }
+  }catch(e){console.warn('Geocode failed:',e);}
+  return null;
+}
+let _geoTimer=null;
+function liveGeocode(){
+  const dest=document.getElementById('tm-dest')?.value.trim();
+  const lbl=document.getElementById('tm-geo-status');
+  if(!lbl)return;
+  if(!dest){lbl.textContent='';return;}
+  lbl.style.color='var(--ink3)';lbl.textContent='Locating\u2026';
+  clearTimeout(_geoTimer);
+  _geoTimer=setTimeout(async()=>{
+    const geo=await geocodeDest(dest);
+    if(geo){lbl.style.color='var(--teal)';lbl.textContent='\uD83D\uDCCD '+geo.name;}
+    else{lbl.style.color='var(--amber)';lbl.textContent='Location not found \u2014 map will centre when you open the planner';}
+  },600);
+}
+
+init();
+</script>
+<script>if('serviceWorker'in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body>
+</html>
